@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+# SessionStart hook for aman plugin
+# Auto-loads identity, tools, workflows, rules into the conversation context
+
+set -euo pipefail
+
+HOME_DIR="$HOME"
+
+# Collect all ecosystem files
+context_parts=""
+
+# Identity (acore)
+core_path="${HOME_DIR}/.acore/core.md"
+if [ -f "$core_path" ]; then
+    core_content=$(cat "$core_path")
+    context_parts="${context_parts}\n\n${core_content}"
+fi
+
+# Tools (akit)
+kit_path="${HOME_DIR}/.akit/kit.md"
+if [ -f "$kit_path" ]; then
+    kit_content=$(cat "$kit_path")
+    context_parts="${context_parts}\n\n---\n\n${kit_content}"
+fi
+
+# Workflows (aflow)
+flow_path="${HOME_DIR}/.aflow/flow.md"
+if [ -f "$flow_path" ]; then
+    flow_content=$(cat "$flow_path")
+    context_parts="${context_parts}\n\n---\n\n${flow_content}"
+fi
+
+# Guardrails (arules)
+rules_path="${HOME_DIR}/.arules/rules.md"
+if [ -f "$rules_path" ]; then
+    rules_content=$(cat "$rules_path")
+    context_parts="${context_parts}\n\n---\n\n${rules_content}"
+fi
+
+# Build the context message
+if [ -z "$context_parts" ]; then
+    session_context="<aman-ecosystem>\nNo aman ecosystem configured. Run: npx @aman_asmuei/aman\n</aman-ecosystem>"
+else
+    session_context="<aman-ecosystem>\nThe following is the user's AI companion configuration. Read it and behave accordingly. Use the available skills (/identity, /tools, /workflows, /rules, /eval) to manage these layers.\n${context_parts}\n</aman-ecosystem>"
+fi
+
+# Escape for JSON
+escape_for_json() {
+    local s="$1"
+    s="${s//\\/\\\\}"
+    s="${s//\"/\\\"}"
+    s="${s//$'\n'/\\n}"
+    s="${s//$'\r'/\\r}"
+    s="${s//$'\t'/\\t}"
+    printf '%s' "$s"
+}
+
+escaped_context=$(escape_for_json "$session_context")
+
+cat <<EOF
+{
+  "additional_context": "${escaped_context}",
+  "hookSpecificOutput": {
+    "hookEventName": "SessionStart",
+    "additionalContext": "${escaped_context}"
+  }
+}
+EOF
+
+exit 0
