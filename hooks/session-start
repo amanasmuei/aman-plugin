@@ -37,6 +37,13 @@ if [ -f "$rules_path" ]; then
     context_parts="${context_parts}\n\n---\n\n${rules_content}"
 fi
 
+# Skills (askill)
+skills_path="${HOME_DIR}/.askill/skills.md"
+if [ -f "$skills_path" ]; then
+    skills_content=$(cat "$skills_path")
+    context_parts="${context_parts}\n\n---\n\n${skills_content}"
+fi
+
 # Build the context message
 if [ -z "$context_parts" ]; then
     session_context="<aman-ecosystem>\nNo aman ecosystem configured. Run: npx @aman_asmuei/aman\n</aman-ecosystem>"
