@@ -50,15 +50,19 @@ claude plugins add aman-plugin https://github.com/amanasmuei/aman-plugin
 
 ### Auto-loads your AI identity every session
 
-The plugin's session-start hook reads your ecosystem files and injects them into every conversation:
+The plugin's session-start hook reads your ecosystem files and injects them into every conversation. It is **engine v1 aware**: each layer is checked at the new scope-aware path first, then falls back to the legacy single-tenant path. The plugin uses scope `dev:plugin`.
 
-| File | What it provides |
-|:-----|:-----------------|
-| `~/.acore/core.md` | AI personality and your preferences |
-| `~/.akit/kit.md` | Available tools and capabilities |
-| `~/.aflow/flow.md` | Multi-step workflow definitions |
-| `~/.arules/rules.md` | Safety boundaries and permissions |
-| `~/.askill/skills.md` | Domain expertise |
+| Layer | Engine v1 path (preferred) | Legacy fallback | What it provides |
+|:------|:---------------------------|:----------------|:-----------------|
+| acore | `~/.acore/dev/plugin/core.md` | `~/.acore/core.md` | AI personality and your preferences |
+| arules | `~/.arules/dev/plugin/rules.md` | `~/.arules/rules.md` | Safety boundaries and permissions |
+| akit | — | `~/.akit/kit.md` | Available tools and capabilities |
+| aflow | — | `~/.aflow/flow.md` | Multi-step workflow definitions |
+| askill | — | `~/.askill/skills.md` | Domain expertise |
+
+> **Engine v1 status:** `acore` and `arules` are the two essentials extracted into multi-tenant libraries (`@aman_asmuei/acore-core`, `@aman_asmuei/arules-core`). `akit`, `aflow`, and `askill` remain dormant single-tenant layers in v1 — they wake up in engine v2.
+
+The hook also exports `AMAN_MCP_SCOPE=dev:plugin` so any MCP tool spawned during the session automatically uses the right scope.
 
 ### Proactive behavior
 
@@ -100,22 +104,56 @@ npx @aman_asmuei/aeval init    # evaluation
 
 ---
 
-## MCP Server
+## Live tools (aman-mcp)
 
-For even deeper integration, add the aman MCP server alongside the plugin:
+The plugin's session-start hook gives Claude Code your identity as **text in
+the prompt** — fast, no tool calls, available immediately. For **live
+read/write** during the session (e.g. updating your personality on the fly,
+rule-checking a proposed action, syncing memory), install the aman-mcp server
+alongside the plugin.
+
+### One-command install
+
+```bash
+node bin/install-mcp.mjs
+```
+
+This adds an `aman` entry to Claude Code's `~/.claude.json` (or wherever it
+keeps MCP server config) with `AMAN_MCP_SCOPE=dev:plugin` set automatically.
+It is **idempotent**, **preserves any other MCP servers** in your config, and
+works on macOS, Linux, and Windows.
+
+### One-command uninstall
+
+```bash
+node bin/uninstall-mcp.mjs
+```
+
+### What you get after installing aman-mcp
+
+aman-mcp provides ~17 MCP tools, all scope-aware via `dev:plugin`:
+
+- **Identity**: `identity_read`, `identity_summary`, `identity_update_section`, `identity_update_session`, `identity_update_dynamics`, `avatar_prompt`
+- **Rules**: `rules_list`, `rules_check`, `rules_add`, `rules_remove`, `rules_toggle`
+- **Tools/Workflows/Skills/Eval/Files**: dormant layer wrappers (legacy file IO)
+
+After installing, restart Claude Code and ask: *"what do you remember about me?"* — the LLM will use the MCP tools to fetch your identity directly.
+
+### Manual install (if you prefer to edit JSON yourself)
 
 ```json
 {
   "mcpServers": {
     "aman": {
       "command": "npx",
-      "args": ["-y", "@aman_asmuei/aman-mcp"]
+      "args": ["-y", "@aman_asmuei/aman-mcp"],
+      "env": {
+        "AMAN_MCP_SCOPE": "dev:plugin"
+      }
     }
   }
 }
 ```
-
-This gives Claude Code 11 additional MCP tools to read/write identity, tools, workflows, rules, and evaluation data programmatically.
 
 ---
 

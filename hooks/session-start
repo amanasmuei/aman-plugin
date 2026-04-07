@@ -1,43 +1,68 @@
 #!/usr/bin/env bash
 # SessionStart hook for aman plugin
-# Auto-loads identity, tools, workflows, rules into the conversation context
+# Auto-loads identity, tools, workflows, rules into the conversation context.
+#
+# Phase 6 / engine v1 alignment: each layer is now scope-aware. The hook tries
+# the new multi-tenant path (~/.acore/dev/plugin/core.md, written by acore-core)
+# first, and falls back to the legacy single-tenant path (~/.acore/core.md)
+# so existing users keep working unchanged. Same pattern for arules.
+#
+# Scope used by this plugin: dev:plugin
 
 set -euo pipefail
 
 HOME_DIR="$HOME"
 
+# Tell any tool spawned during this session which aman scope to use.
+export AMAN_MCP_SCOPE="dev:plugin"
+export AMAN_PLUGIN_SCOPE="dev:plugin"
+
+# Resolve a layer file by trying the new scope-aware path first, then the
+# legacy path. Echoes the resolved path if found, nothing otherwise.
+resolve_layer_file() {
+    local layer_dir="$1"
+    local filename="$2"
+    local new_path="${HOME_DIR}/${layer_dir}/dev/plugin/${filename}"
+    local legacy_path="${HOME_DIR}/${layer_dir}/${filename}"
+    if [ -f "$new_path" ]; then
+        printf '%s' "$new_path"
+    elif [ -f "$legacy_path" ]; then
+        printf '%s' "$legacy_path"
+    fi
+}
+
 # Collect all ecosystem files
 context_parts=""
 
-# Identity (acore)
-core_path="${HOME_DIR}/.acore/core.md"
-if [ -f "$core_path" ]; then
+# Identity (acore) — engine v1 aware
+core_path=$(resolve_layer_file ".acore" "core.md")
+if [ -n "$core_path" ]; then
     core_content=$(cat "$core_path")
     context_parts="${context_parts}\n\n${core_content}"
 fi
 
-# Tools (akit)
+# Tools (akit) — dormant layer in engine v1, only legacy path exists
 kit_path="${HOME_DIR}/.akit/kit.md"
 if [ -f "$kit_path" ]; then
     kit_content=$(cat "$kit_path")
     context_parts="${context_parts}\n\n---\n\n${kit_content}"
 fi
 
-# Workflows (aflow)
+# Workflows (aflow) — dormant layer in engine v1
 flow_path="${HOME_DIR}/.aflow/flow.md"
 if [ -f "$flow_path" ]; then
     flow_content=$(cat "$flow_path")
     context_parts="${context_parts}\n\n---\n\n${flow_content}"
 fi
 
-# Guardrails (arules)
-rules_path="${HOME_DIR}/.arules/rules.md"
-if [ -f "$rules_path" ]; then
+# Guardrails (arules) — engine v1 aware
+rules_path=$(resolve_layer_file ".arules" "rules.md")
+if [ -n "$rules_path" ]; then
     rules_content=$(cat "$rules_path")
     context_parts="${context_parts}\n\n---\n\n${rules_content}"
 fi
 
-# Skills (askill)
+# Skills (askill) — dormant layer in engine v1
 skills_path="${HOME_DIR}/.askill/skills.md"
 if [ -f "$skills_path" ]; then
     skills_content=$(cat "$skills_path")
