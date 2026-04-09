@@ -141,6 +141,8 @@ npx @aman_asmuei/amem init
 
 Once `~/.amem/` exists, the plugin **auto-detects it** and injects memory guidance. Claude will proactively call `memory_store`, `memory_recall`, and `memory_inject` during sessions.
 
+> **Heads up — `amem init` keeps running.** The first run downloads the embedding model and then **stays in the foreground as an MCP server**. Once you see lines like `Vector index built: N vectors` and `Embedding model loaded`, initialization is complete — **press `Ctrl+C` to exit**. Claude Code spawns its own amem process when needed, so you don't need to keep this one running.
+
 ### Step 6 — Verify
 
 Restart Claude Code. In a new session, try:
