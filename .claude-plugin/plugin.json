@@ -1,0 +1,23 @@
+{
+  "name": "aman-plugin",
+  "version": "2.1.0",
+  "description": "The complete AI companion plugin for Claude Code. Auto-loads your identity, memory, tools, workflows, guardrails, and skills — every session, zero setup.",
+  "author": {
+    "name": "amanasmuei",
+    "url": "https://github.com/amanasmuei"
+  },
+  "homepage": "https://github.com/amanasmuei/aman-plugin",
+  "repository": "https://github.com/amanasmuei/aman-plugin",
+  "license": "MIT",
+  "keywords": [
+    "aman",
+    "ai-companion",
+    "identity",
+    "memory",
+    "amem",
+    "acore",
+    "arules",
+    "claude-code",
+    "mcp"
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "name": "aman",
+  "owner": {
+    "name": "amanasmuei",
+    "url": "https://github.com/amanasmuei"
+  },
+  "metadata": {
+    "description": "The aman AI companion ecosystem for Claude Code — identity, memory, rules, and more."
+  },
+  "plugins": [
+    {
+      "name": "aman-plugin",
+      "source": "./",
+      "description": "Auto-loads your identity, memory, tools, workflows, guardrails, and skills — every session, zero setup.",
+      "version": "2.1.0",
+      "homepage": "https://github.com/amanasmuei/aman-plugin",
+      "license": "MIT",
+      "category": "productivity",
+      "keywords": ["identity", "memory", "amem", "acore", "arules"]
+    }
+  ]
+}

@@ -33,6 +33,11 @@ Even with the aman ecosystem set up, you still have to manually inject identity 
 
 **aman-plugin** bridges that gap for Claude Code. Install once, and your full AI ecosystem loads automatically every session — identity, rules, memory, tools, workflows, and skills.
 
+```bash
+claude plugin marketplace add amanasmuei/aman-plugin
+claude plugin install aman-plugin@aman
+```
+
 > **No more CLAUDE.md injection. No manual setup. It just works.**
 
 ---
@@ -81,11 +86,38 @@ Each installer is idempotent — safe to re-run.
 
 ### Step 3 — Install the plugin
 
+Claude Code installs plugins from **marketplaces**. This repo ships its own marketplace manifest, so you add it as a marketplace once, then install the plugin from it:
+
 ```bash
-claude plugins add aman-plugin https://github.com/amanasmuei/aman-plugin
+# 1. Register this repo as a marketplace
+claude plugin marketplace add amanasmuei/aman-plugin
+
+# 2. Install the plugin from it
+claude plugin install aman-plugin@aman
 ```
 
 Claude Code registers the plugin and wires its `SessionStart` hook. From now on, the hook fires automatically on every session start, resume, clear, and compact.
+
+<details>
+<summary><b>Other ways to install</b></summary>
+
+**From inside Claude Code** — use the `/plugin` slash command, then pick `aman-plugin` after adding the marketplace.
+
+**From a local clone** — useful for development:
+
+```bash
+git clone https://github.com/amanasmuei/aman-plugin ~/aman-plugin
+claude plugin marketplace add ~/aman-plugin
+claude plugin install aman-plugin@aman
+```
+
+**Verify the install:**
+
+```bash
+claude plugin list
+```
+
+</details>
 
 ### Step 4 — Install live tools (`aman-mcp`)
 
@@ -314,7 +346,8 @@ Yes. The hook tries engine-v1 scope-aware paths first, then automatically falls 
 <summary><b>How do I update the plugin?</b></summary>
 
 ```bash
-claude plugins update aman-plugin
+claude plugin marketplace update aman
+claude plugin update aman-plugin
 ```
 
 Then restart Claude Code. See [CHANGELOG.md](CHANGELOG.md) for what changed.
@@ -326,7 +359,8 @@ Then restart Claude Code. See [CHANGELOG.md](CHANGELOG.md) for what changed.
 
 ```bash
 node bin/uninstall-mcp.mjs            # removes aman-mcp from ~/.claude.json
-claude plugins remove aman-plugin     # removes the plugin
+claude plugin uninstall aman-plugin   # removes the plugin
+claude plugin marketplace remove aman # removes the marketplace entry
 # (optional) remove ecosystem data:
 rm -rf ~/.acore ~/.arules ~/.amem ~/.aeval ~/.akit ~/.aflow ~/.askill
 ```
