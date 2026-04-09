@@ -61,6 +61,9 @@ npx @aman_asmuei/aman
 
 This walks you through setting up `acore` (identity), `arules` (guardrails), and `aeval` (relationship tracking).
 
+> **Why `npx` and not `npm install -g`?**
+> These are one-shot setup commands — run once, done. `npx` keeps your global `node_modules` clean, always pulls the latest published version, and avoids `sudo` / permission issues on macOS and Linux. If you *really* want a global install (e.g. you run the CLIs dozens of times a day), `npm install -g @aman_asmuei/aman` works too — but it's not recommended for most users.
+
 <details>
 <summary><b>Prefer to install layers individually?</b></summary>
 
