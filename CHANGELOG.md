@@ -2,6 +2,19 @@
 
 All notable changes to `aman-plugin` are documented in this file.
 
+## [2.3.1] — 2026-04-09
+
+### Added
+- **Auto-sync Claude auto-memory into amem on SessionStart.** The
+  session-start hook now fires `amem-cli sync` in the background
+  (fire-and-forget) whenever a session starts, resumes, clears, or
+  compacts. This closes the drift between Claude Code's built-in
+  auto-memory files (`~/.claude/projects/*/memory/*.md`) and amem,
+  which is the canonical memory store for the aman ecosystem.
+  Non-blocking (no startup latency), silent (suppresses the cosmetic
+  embedding-model shutdown crash), and safe if `amem-cli` is not
+  installed. Non-destructive — sync deduplicates by content hash.
+
 ## [2.3.0] — 2026-04-09
 
 ### Added

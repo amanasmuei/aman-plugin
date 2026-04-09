@@ -13,6 +13,13 @@ set -euo pipefail
 
 HOME_DIR="$HOME"
 
+# Auto-sync Claude Code auto-memory into amem (fire-and-forget).
+# Runs in background so it never blocks session startup or surfaces the
+# embedding-model shutdown crash. Safe if amem-cli is missing.
+if command -v amem-cli >/dev/null 2>&1; then
+    (nohup amem-cli sync >/dev/null 2>&1 &) || true
+fi
+
 # Local time awareness — OS already knows the timezone, just pass it through.
 LOCAL_TIME=$(date '+%Y-%m-%d %H:%M %Z')
 LOCAL_TZ=$(date '+%Z')
