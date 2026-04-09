@@ -302,7 +302,7 @@ The hook also exports `AMAN_MCP_SCOPE=dev:plugin` so any MCP tool spawned during
 | **Architecture decisions** | Stores as versioned decisions in amem |
 | **Before risky actions** | Checks against your guardrails |
 | **During tasks** | Follows matching workflows automatically |
-| **Session end** | Offers to save what the AI learned |
+| **Session end** | Offers to save what the AI learned; offers `/session-narrative` for substantial sessions where the reasoning path matters |
 
 ---
 
@@ -315,8 +315,11 @@ The hook also exports `AMAN_MCP_SCOPE=dev:plugin` so any MCP tool spawned during
 | `/workflows` | List workflows, follow them during tasks |
 | `/rules` | Check guardrails, validate actions |
 | `/eval` | Log sessions, view relationship report |
+| `/session-narrative` ⭐ | Save a 300–500 word flowing-prose narrative of the session's reasoning path to amem (or Claude auto-memory if amem isn't installed) |
 
 > **Memory commands** (`/remember`, `/recall`, `/context`, `/dashboard`, `/sync`) are provided by the separate **amem plugin** — see [Step 5](#step-5--add-persistent-memory-recommended) to install it.
+>
+> **`/session-narrative` is the companion to aman-copilot's prompt file of the same name.** Same protocol, same memory store, same output shape — works on all three surfaces (Claude Code, VS Code Copilot Chat, Copilot CLI) because they share memory via amem's dev:* scope inheritance. Use it at the end of any substantial session where the reasoning path matters, not just the final decisions.
 
 ---
 

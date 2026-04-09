@@ -3,6 +3,57 @@
 All notable changes to `aman-claude-code` (formerly `aman-plugin`) are
 documented in this file.
 
+## [3.1.0] — 2026-04-09
+
+**Session narratives come to Claude Code.** New `/session-narrative`
+skill, parity with aman-copilot@0.4.1's prompt file of the same name.
+
+### Added
+- **`skills/session-narrative/SKILL.md`** — new Claude Code skill that
+  writes a 300–500 word flowing-prose narrative of the current
+  session's reasoning path (intent → attempts → dead ends → pivot
+  moments → outcome → lessons) and saves it to amem via
+  `memory_store`. If amem isn't installed, falls back to writing the
+  narrative into Claude Code's auto-memory directory so the next
+  `amem-cli sync` will import it.
+- **"Memory 101" section** in the README introduced in the previous
+  commit now references `/session-narrative` as the flagship session
+  closer.
+- **Proactive behavior table** updated to mention `/session-narrative`
+  as a session-end option for substantial work.
+
+### Why this matters
+Scattered `memory_store` calls capture *what we decided*. They don't
+capture *how we got there*. A session narrative is a single prose
+note per substantial session that preserves the reasoning path —
+attempts, dead ends, pivot moments, lessons — so future sessions can
+understand not just the outcome but the thinking that produced it.
+
+The skill is the Claude Code twin of aman-copilot's prompt file of
+the same name. Same protocol, same output shape, same amem store,
+same dev:* scope inheritance — works transparently across Claude
+Code, VS Code Copilot Chat, and Copilot CLI. Write a narrative in
+any surface; recall it in any other.
+
+### Parity with aman-copilot
+
+| Feature | aman-copilot@0.4.1 | aman-claude-code@3.1.0 |
+|:---|:---:|:---:|
+| `/identity` | prompt file | skill (existing) |
+| `/rules` | prompt file | skill (existing) |
+| `/eval` | prompt file | skill (existing) |
+| `/remember` | prompt file | from amem plugin |
+| `/session-narrative` | prompt file | **skill (new)** |
+
+### Inspiration
+The session narrative pattern is borrowed from Kiyoraka's
+[Project-AI-MemoryCore](https://github.com/Kiyoraka/Project-AI-MemoryCore)
+(which also inspired acore's Fundamental Truths in 0.7.0).
+MemoryCore's Save-Diary-System proved that AI-authored session
+documents are a sweet spot between scattered facts and raw
+transcripts. This release adapts the pattern to amem's curated-memory
+philosophy.
+
 ## [3.0.0] — 2026-04-09
 
 **Renamed from `aman-plugin` to `aman-claude-code`.** This is a

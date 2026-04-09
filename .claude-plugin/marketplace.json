@@ -12,7 +12,7 @@
       "name": "aman-claude-code",
       "source": "./",
       "description": "Auto-loads your identity, memory, tools, workflows, guardrails, and skills — every session, zero setup.",
-      "version": "3.0.0",
+      "version": "3.1.0",
       "homepage": "https://github.com/amanasmuei/aman-claude-code",
       "license": "MIT",
       "category": "productivity",
