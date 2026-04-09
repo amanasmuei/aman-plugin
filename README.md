@@ -19,7 +19,7 @@ Auto-loads your identity, memory, tools, workflows, guardrails, and skills — e
 [![Tests](https://img.shields.io/badge/tests-20%20passing-brightgreen.svg?style=flat-square)](./test/test-hook.sh)
 [![Engine](https://img.shields.io/badge/engine-v1-informational.svg?style=flat-square)](./docs/engine-v1.md)
 
-[Quickstart](#quickstart) · [What It Does](#what-it-does) · [Slash Commands](#slash-commands) · [Live Tools](#live-tools-aman-mcp) · [Troubleshooting](#troubleshooting) · [Ecosystem](#the-ecosystem)
+[Quickstart](#quickstart) · [Updating](#updating) · [What It Does](#what-it-does) · [Slash Commands](#slash-commands) · [Live Tools](#live-tools-aman-mcp) · [Troubleshooting](#troubleshooting) · [Ecosystem](#the-ecosystem)
 
 </div>
 
@@ -188,6 +188,23 @@ bash hooks/session-start | jq -r '.additional_context' | head -40
 You should see your identity, rules, and (if amem is installed) memory guidance.
 
 </details>
+
+---
+
+## Updating
+
+To pull the latest version from the marketplace:
+
+```bash
+claude plugin marketplace update aman
+claude plugin update aman-plugin@aman
+```
+
+Then `/reload-plugins` inside Claude Code (or restart). The first command re-fetches the marketplace manifest from GitHub; the second applies the new version to your install. Always use `aman-plugin@aman` (with the marketplace qualifier) — the bare `aman-plugin` will return *"Plugin not found"*.
+
+> **Tip:** run `claude plugin list` to see what's installed and at which scope (`user` or `project`). If you see the same plugin listed twice, you probably installed it once globally and once inside a project — keep the `user` scope one and uninstall the other with `claude plugin uninstall aman-plugin@aman --scope project`.
+
+See [CHANGELOG.md](CHANGELOG.md) for what's new in each release.
 
 ---
 
@@ -363,8 +380,10 @@ Yes. The hook tries engine-v1 scope-aware paths first, then automatically falls 
 
 ```bash
 claude plugin marketplace update aman
-claude plugin update aman-plugin
+claude plugin update aman-plugin@aman
 ```
+
+> **Note:** always use the fully-qualified `aman-plugin@aman` form (plugin name + marketplace name). The bare `aman-plugin` will fail with *"Plugin not found"* because Claude Code needs the marketplace qualifier to disambiguate.
 
 Then restart Claude Code. See [CHANGELOG.md](CHANGELOG.md) for what changed.
 
@@ -375,7 +394,7 @@ Then restart Claude Code. See [CHANGELOG.md](CHANGELOG.md) for what changed.
 
 ```bash
 node ~/.claude/plugins/cache/aman/aman-plugin/*/bin/uninstall-mcp.mjs  # removes aman-mcp from ~/.claude.json
-claude plugin uninstall aman-plugin                                  # removes the plugin
+claude plugin uninstall aman-plugin@aman                             # removes the plugin
 claude plugin marketplace remove aman                                # removes the marketplace entry
 # (optional) remove ecosystem data:
 rm -rf ~/.acore ~/.arules ~/.amem ~/.aeval ~/.akit ~/.aflow ~/.askill
