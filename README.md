@@ -61,23 +61,25 @@ You need:
 The plugin loads files the ecosystem writes to your home directory. Run the one-shot installer:
 
 ```bash
-npx @aman_asmuei/aman
+npx @aman_asmuei/aman@latest
 ```
 
 This walks you through setting up `acore` (identity), `arules` (guardrails), and `aeval` (relationship tracking).
 
-> **Why `npx` and not `npm install -g`?**
-> These are one-shot setup commands — run once, done. `npx` keeps your global `node_modules` clean, always pulls the latest published version, and avoids `sudo` / permission issues on macOS and Linux. If you *really* want a global install (e.g. you run the CLIs dozens of times a day), `npm install -g @aman_asmuei/aman` works too — but it's not recommended for most users.
+> **New in acore 0.7.0:** developer archetypes now ship with **Fundamental Truths** — short self-anchoring assertions the AI re-reads each session so it stays in character across long conversations (e.g. The Mentor stays patient; The Pragmatist keeps leading with the answer). Non-breaking, additive. See [acore#1](https://github.com/amanasmuei/acore/issues/1) for the design story. Concept credit: [Kiyoraka/Project-AI-MemoryCore](https://github.com/Kiyoraka/Project-AI-MemoryCore).
+
+> **Why `npx @latest` and not `npm install -g`?**
+> These are one-shot setup commands — run once, done. `npx` keeps your global `node_modules` clean and avoids `sudo` / permission issues on macOS and Linux. The explicit `@latest` tag matters: **npx caches binaries**, so if you (or your friend) ran a package yesterday you may get the cached older version on the next run. `@latest` forces a fresh resolve against the npm registry. If you *really* want a global install, `npm install -g @aman_asmuei/aman` works too — but it's not recommended for most users.
 
 <details>
 <summary><b>Prefer to install layers individually?</b></summary>
 
 ```bash
-npx @aman_asmuei/acore            # identity    → ~/.acore/dev/plugin/core.md
-npx @aman_asmuei/arules init      # guardrails  → ~/.arules/dev/plugin/rules.md
-npx @aman_asmuei/aeval init       # evaluation
-npx @aman_asmuei/akit add github  # (optional) tools
-npx @aman_asmuei/aflow init       # (optional) workflows
+npx @aman_asmuei/acore@latest            # identity    → ~/.acore/dev/plugin/core.md
+npx @aman_asmuei/arules@latest init      # guardrails  → ~/.arules/dev/plugin/rules.md
+npx @aman_asmuei/aeval@latest init       # evaluation
+npx @aman_asmuei/akit@latest add github  # (optional) tools
+npx @aman_asmuei/aflow@latest init       # (optional) workflows
 ```
 
 Each installer is idempotent — safe to re-run.
@@ -150,7 +152,7 @@ This gives you:
 Then initialize the local database once:
 
 ```bash
-npx @aman_asmuei/amem init
+npx @aman_asmuei/amem@latest init
 ```
 
 Once `~/.amem/` exists, aman-plugin's session-start hook **auto-detects it** and injects memory-usage guidance. Claude will proactively use the amem MCP tools during every session.
@@ -222,8 +224,8 @@ The `npx @aman_asmuei/acore` wizard gives you the best onboarding:
 - Creates the identity file at the correct scope-aware path
 
 ```bash
-npx @aman_asmuei/acore         # identity — one-time, 15 seconds
-npx @aman_asmuei/arules init   # guardrails — one-time
+npx @aman_asmuei/acore@latest         # identity — one-time, 15 seconds
+npx @aman_asmuei/arules@latest init   # guardrails — one-time
 ```
 
 ### Day-to-day → just talk to Claude
@@ -362,7 +364,7 @@ node ~/.claude/plugins/cache/aman/aman-plugin/*/bin/uninstall-mcp.mjs
    ```bash
    ls ~/.acore/dev/plugin/core.md 2>/dev/null || ls ~/.acore/core.md
    ```
-4. If neither exists, you haven't set up the ecosystem yet — run `npx @aman_asmuei/aman`.
+4. If neither exists, you haven't set up the ecosystem yet — run `npx @aman_asmuei/aman@latest`.
 
 </details>
 
@@ -391,7 +393,7 @@ The plugin gates amem guidance on `~/.amem/` existing. Confirm:
 ls -la ~/.amem
 ```
 
-If missing, run `npx @aman_asmuei/amem init`. Then start a new Claude Code session.
+If missing, run `npx @aman_asmuei/amem@latest init`. Then start a new Claude Code session.
 
 </details>
 
