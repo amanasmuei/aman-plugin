@@ -2,6 +2,38 @@
 
 All notable changes to `aman-plugin` are documented in this file.
 
+## [2.2.0] — 2026-04-09
+
+### Changed
+- **Memory skills moved to the amem plugin.** The 5 memory skills
+  (`/remember`, `/recall`, `/context`, `/dashboard`, `/sync`) that shipped
+  in 2.1.0 are now canonically provided by the separate
+  [amem plugin](https://github.com/amanasmuei/amem) — which also registers
+  the `amem-memory` MCP server and ships `PostToolUse` / `Stop` hooks for
+  automatic memory extraction and session-end consolidation.
+
+  Bundling the skills here created duplicate entries in the command picker
+  for users who (correctly) had both plugins installed, and the skills were
+  broken wrappers for users who had only aman-plugin (no MCP server to
+  call). Removing them leaves a **clean command palette** and makes the
+  ecosystem boundaries explicit: aman-plugin for identity/rules/tools/
+  workflows/eval, amem plugin for memory.
+
+- **README Step 5** now installs the amem plugin via the Claude Code
+  marketplace (`claude plugin marketplace add amanasmuei/amem &&
+  claude plugin install amem@amem`) instead of only running
+  `npx @aman_asmuei/amem init`. The CLI init still runs to create the
+  local database.
+
+- **Session-start hook** no longer advertises the removed memory slash
+  commands. It still auto-detects `~/.amem/` and injects memory-usage
+  guidance telling Claude to proactively call the amem MCP tools
+  (`memory_store`, `memory_recall`, `memory_inject`, etc.) directly.
+
+### Removed
+- `skills/remember/`, `skills/recall/`, `skills/context/`,
+  `skills/dashboard/`, `skills/sync/` — see rationale above.
+
 ## [2.1.0] — 2026-04-09
 
 ### Added

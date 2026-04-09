@@ -133,15 +133,31 @@ This is **idempotent**, **preserves any other MCP servers** in your config, and 
 
 ### Step 5 — Add persistent memory *(recommended)*
 
-Install [amem](https://github.com/amanasmuei/amem) for cross-session memory — corrections, decisions, preferences, and reminders:
+Memory is provided by the **amem plugin** — a separate Claude Code plugin from the same ecosystem. Install it alongside aman-plugin:
+
+```bash
+claude plugin marketplace add amanasmuei/amem
+claude plugin install amem@amem
+```
+
+This gives you:
+
+- The **`amem-memory` MCP server** (~30 tools: `memory_store`, `memory_recall`, `memory_inject`, `memory_doctor`, etc.)
+- **Memory skills** — `/remember`, `/recall`, `/context`, `/dashboard`, `/sync`
+- **Automatic extraction** via a `PostToolUse` hook (learns from tool calls)
+- **Session-end consolidation** via a `Stop` hook
+
+Then initialize the local database once:
 
 ```bash
 npx @aman_asmuei/amem init
 ```
 
-Once `~/.amem/` exists, the plugin **auto-detects it** and injects memory guidance. Claude will proactively call `memory_store`, `memory_recall`, and `memory_inject` during sessions.
+Once `~/.amem/` exists, aman-plugin's session-start hook **auto-detects it** and injects memory-usage guidance. Claude will proactively use the amem MCP tools during every session.
 
-> **Heads up — `amem init` keeps running.** The first run downloads the embedding model and then **stays in the foreground as an MCP server**. Once you see lines like `Vector index built: N vectors` and `Embedding model loaded`, initialization is complete — **press `Ctrl+C` to exit**. Claude Code spawns its own amem process when needed, so you don't need to keep this one running.
+> **Heads up — `amem init` keeps running.** The first run downloads the embedding model and then **stays in the foreground as an MCP server**. Once you see lines like `Vector index built: N vectors` and `Embedding model loaded`, initialization is complete — **press `Ctrl+C` to exit**. Claude Code spawns its own amem process via the plugin when needed, so you don't need to keep this one running.
+
+> **Why two plugins?** aman-plugin handles identity, rules, tools, workflows, eval (the acore/arules/akit/aflow/aeval layers). amem-plugin handles persistent memory. They're complementary and have no overlap — together they form the full aman ecosystem for Claude Code.
 
 ### Step 6 — Verify
 
@@ -149,7 +165,7 @@ Restart Claude Code. In a new session, try:
 
 - [ ] *"What do you know about me?"* — Claude should reference details from your `acore` identity.
 - [ ] *"Read my identity with the MCP tool."* — Claude should call `identity_read` and return your config. *(requires Step 4)*
-- [ ] *"Remember that I prefer pnpm over npm."* — Claude should call `memory_store`. *(requires Step 5)*
+- [ ] *"Remember that I prefer pnpm over npm."* — Claude should call `memory_store`. *(requires Step 5 — amem plugin)*
 
 <details>
 <summary><b>Run the test suite</b></summary>
@@ -216,11 +232,8 @@ The hook also exports `AMAN_MCP_SCOPE=dev:plugin` so any MCP tool spawned during
 | `/workflows` | List workflows, follow them during tasks |
 | `/rules` | Check guardrails, validate actions |
 | `/eval` | Log sessions, view relationship report |
-| `/remember` | Store a memory (correction, decision, preference) |
-| `/recall` | Search memories by topic |
-| `/context` | Load full memory context for the current task |
-| `/dashboard` | Inspect memory stats and recent activity |
-| `/sync` | Reconcile amem with Claude auto-memory |
+
+> **Memory commands** (`/remember`, `/recall`, `/context`, `/dashboard`, `/sync`) are provided by the separate **amem plugin** — see [Step 5](#step-5--add-persistent-memory-recommended) to install it.
 
 ---
 

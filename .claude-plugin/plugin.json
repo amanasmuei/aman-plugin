@@ -1,6 +1,6 @@
 {
   "name": "aman-plugin",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "The complete AI companion plugin for Claude Code. Auto-loads your identity, memory, tools, workflows, guardrails, and skills — every session, zero setup.",
   "author": {
     "name": "amanasmuei",

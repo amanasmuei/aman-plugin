@@ -113,7 +113,7 @@ fi
 if [ -z "$context_parts" ]; then
     session_context="<aman-ecosystem>\nNo aman ecosystem configured. Run: npx @aman_asmuei/aman\n</aman-ecosystem>"
 else
-    session_context="<aman-ecosystem>\nThe following is the user's AI companion configuration. Read it and behave accordingly. Use the available skills (/identity, /tools, /workflows, /rules, /eval, /remember, /recall, /context, /dashboard, /sync) to manage these layers.\n${context_parts}\n</aman-ecosystem>"
+    session_context="<aman-ecosystem>\nThe following is the user's AI companion configuration. Read it and behave accordingly. Use the available skills (/identity, /tools, /workflows, /rules, /eval) to manage these layers. For persistent memory, use the amem MCP tools (memory_store, memory_recall, memory_inject, etc.) directly — see the memory guidance below if amem is installed.\n${context_parts}\n</aman-ecosystem>"
 fi
 
 # Escape for JSON
