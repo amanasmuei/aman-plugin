@@ -69,11 +69,51 @@ if [ -f "$skills_path" ]; then
     context_parts="${context_parts}\n\n---\n\n${skills_content}"
 fi
 
+# Memory (amem) — runtime MCP layer. Inject usage guidance so the LLM
+# proactively uses memory_inject/memory_store/memory_recall when amem-mcp
+# is available. Detected by presence of the amem data dir.
+amem_dir="${HOME_DIR}/.amem"
+if [ -d "$amem_dir" ]; then
+    amem_guidance='# amem — Persistent Memory (active)
+
+You have access to **amem**, a persistent memory MCP server. Use it proactively.
+
+## Session start
+1. Call `memory_inject` with the current task topic — surfaces corrections (MUST follow) and decisions.
+2. Call `reminder_check` — shows overdue and upcoming reminders.
+3. Treat corrections as absolute constraints — they override everything.
+
+## During the session
+- **Corrections** ("don'\''t", "never", "stop"): call `memory_store` immediately, type=correction, confidence=1.0.
+- **Decisions** ("we chose", "let'\''s go with"): `memory_store`, type=decision, confidence=0.9.
+- **Rejections of your suggestion**: store as correction with the reason.
+- **Every ~10 exchanges**: call `memory_extract` to batch insights.
+
+## Recall
+- `memory_recall` (compact, default) → `memory_detail` for full content.
+- `memory_search` for exact matches; `memory_multi_recall` for 4-strategy search.
+
+## Privacy
+- Wrap sensitive text in `<private>...</private>` — stripped before storage.
+- API keys, tokens, passwords are auto-redacted.
+
+## Tiers
+- **core** — always injected (~500 tokens). Promote critical corrections here via `memory_tier`.
+- **working** — session-scoped.
+- **archival** — default, searchable.
+
+## Admin / self-heal
+If memory behaves oddly, use `memory_doctor` (diagnose), `memory_repair` (fix), `memory_config` (inspect config), `memory_sync` (reconcile).
+
+amem is authoritative over Claude auto-memory when they conflict (it has versioning + timestamps).'
+    context_parts="${context_parts}\n\n---\n\n${amem_guidance}"
+fi
+
 # Build the context message
 if [ -z "$context_parts" ]; then
     session_context="<aman-ecosystem>\nNo aman ecosystem configured. Run: npx @aman_asmuei/aman\n</aman-ecosystem>"
 else
-    session_context="<aman-ecosystem>\nThe following is the user's AI companion configuration. Read it and behave accordingly. Use the available skills (/identity, /tools, /workflows, /rules, /eval) to manage these layers.\n${context_parts}\n</aman-ecosystem>"
+    session_context="<aman-ecosystem>\nThe following is the user's AI companion configuration. Read it and behave accordingly. Use the available skills (/identity, /tools, /workflows, /rules, /eval, /remember, /recall, /context, /dashboard, /sync) to manage these layers.\n${context_parts}\n</aman-ecosystem>"
 fi
 
 # Escape for JSON

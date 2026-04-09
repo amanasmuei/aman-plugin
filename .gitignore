@@ -2,3 +2,25 @@
 *.swp
 *.swo
 *~
+
+# Node
+node_modules/
+dist/
+build/
+*.log
+npm-debug.log*
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# Editor
+.idea/
+.vscode/
+*.iml
+
+# Temp
+*.tmp
+*.bak
+.aman-install.tmp

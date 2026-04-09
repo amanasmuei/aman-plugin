@@ -26,7 +26,7 @@ import * as os from "node:os";
 const ENTRY_NAME = "aman";
 const ENTRY_VALUE = {
   command: "npx",
-  args: ["-y", "@aman_asmuei/aman-mcp"],
+  args: ["-y", "@aman_asmuei/aman-mcp@^0.6.0"],
   env: {
     AMAN_MCP_SCOPE: "dev:plugin",
   },

@@ -228,6 +228,60 @@ fi
 
 rm -rf "$TMPDIR8"
 
+# ---------- Test 9: amem guidance injected when ~/.amem exists ----------
+echo ""
+echo "Test 9: amem guidance injected when ~/.amem exists"
+TMPDIR9=$(mktemp -d)
+mkdir -p "$TMPDIR9/.amem"
+
+OUTPUT=$(HOME="$TMPDIR9" bash "$HOOK_PATH" 2>&1)
+
+CONTEXT=$(echo "$OUTPUT" | jq -r '.additional_context')
+if echo "$CONTEXT" | grep -q "amem — Persistent Memory"; then
+  pass "amem guidance injected when ~/.amem exists"
+else
+  fail "amem guidance missing when ~/.amem exists"
+fi
+if echo "$CONTEXT" | grep -q "memory_inject"; then
+  pass "amem guidance mentions memory_inject"
+else
+  fail "amem guidance missing memory_inject reference"
+fi
+
+rm -rf "$TMPDIR9"
+
+# ---------- Test 10: amem guidance absent when ~/.amem missing ----------
+echo ""
+echo "Test 10: amem guidance absent when ~/.amem missing"
+TMPDIR10=$(mktemp -d)
+mkdir -p "$TMPDIR10/.acore"
+echo "# Identity" > "$TMPDIR10/.acore/core.md"
+
+OUTPUT=$(HOME="$TMPDIR10" bash "$HOOK_PATH" 2>&1)
+
+CONTEXT=$(echo "$OUTPUT" | jq -r '.additional_context')
+if echo "$CONTEXT" | grep -q "amem — Persistent Memory"; then
+  fail "amem guidance should not be injected without ~/.amem"
+else
+  pass "amem guidance correctly omitted when ~/.amem missing"
+fi
+
+rm -rf "$TMPDIR10"
+
+# ---------- Test 11: install-mcp.mjs syntax is valid ----------
+echo ""
+echo "Test 11: install-mcp.mjs syntax"
+if node --check "$SCRIPT_DIR/../bin/install-mcp.mjs" 2>/dev/null; then
+  pass "install-mcp.mjs parses cleanly"
+else
+  fail "install-mcp.mjs has syntax errors"
+fi
+if grep -q 'aman-mcp@\^' "$SCRIPT_DIR/../bin/install-mcp.mjs"; then
+  pass "install-mcp.mjs pins aman-mcp version"
+else
+  fail "install-mcp.mjs does not pin aman-mcp version"
+fi
+
 # ---------- Summary ----------
 echo ""
 echo "================================"

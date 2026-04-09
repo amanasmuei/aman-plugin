@@ -59,6 +59,7 @@ The plugin's session-start hook reads your ecosystem files and injects them into
 | akit | — | `~/.akit/kit.md` | Available tools and capabilities |
 | aflow | — | `~/.aflow/flow.md` | Multi-step workflow definitions |
 | askill | — | `~/.askill/skills.md` | Domain expertise |
+| amem | `~/.amem/` (runtime MCP) | — | Persistent memory: corrections, decisions, reminders |
 
 > **Engine v1 status:** `acore` and `arules` are the two essentials extracted into multi-tenant libraries (`@aman_asmuei/acore-core`, `@aman_asmuei/arules-core`). `akit`, `aflow`, and `askill` remain dormant single-tenant layers in v1 — they wake up in engine v2.
 
@@ -83,6 +84,11 @@ The hook also exports `AMAN_MCP_SCOPE=dev:plugin` so any MCP tool spawned during
 | `/workflows` | List workflows, follow them during tasks |
 | `/rules` | Check guardrails, validate actions |
 | `/eval` | Log sessions, view relationship report |
+| `/remember` | Store a memory (correction, decision, preference) |
+| `/recall` | Search memories by topic |
+| `/context` | Load full memory context for the current task |
+| `/dashboard` | Inspect memory stats and recent activity |
+| `/sync` | Reconcile amem with Claude auto-memory |
 
 ---
 
@@ -131,11 +137,17 @@ node bin/uninstall-mcp.mjs
 
 ### What you get after installing aman-mcp
 
-aman-mcp provides ~17 MCP tools, all scope-aware via `dev:plugin`:
+aman-mcp provides **31 MCP tools**, all scope-aware via `dev:plugin`:
 
-- **Identity**: `identity_read`, `identity_summary`, `identity_update_section`, `identity_update_session`, `identity_update_dynamics`, `avatar_prompt`
-- **Rules**: `rules_list`, `rules_check`, `rules_add`, `rules_remove`, `rules_toggle`
-- **Tools/Workflows/Skills/Eval/Files**: dormant layer wrappers (legacy file IO)
+- **Identity (6)**: `identity_read`, `identity_summary`, `identity_update_section`, `identity_update_session`, `identity_update_dynamics`, `avatar_prompt`
+- **Rules (5)**: `rules_list`, `rules_check`, `rules_add`, `rules_remove`, `rules_toggle`
+- **Tools (4)**: `tools_list`, `tools_add`, `tools_remove`, `tools_search`
+- **Workflows (5)**: `workflow_list`, `workflow_get`, `workflow_add`, `workflow_update`, `workflow_remove`
+- **Skills (4)**: `skill_list`, `skill_search`, `skill_install`, `skill_uninstall`
+- **Eval (4)**: `eval_log`, `eval_milestone`, `eval_report`, `eval_status`
+- **Files/Docs (3)**: `file_read`, `file_list`, `doc_convert`
+
+For **persistent memory**, install [amem](https://github.com/amanasmuei/amem) separately — it provides an additional ~30 MCP tools (`memory_store`, `memory_recall`, `memory_inject`, plus self-heal: `memory_doctor`, `memory_repair`, `memory_config`, `memory_sync`). The plugin's session-start hook auto-detects `~/.amem/` and injects memory guidance.
 
 After installing, restart Claude Code and ask: *"what do you remember about me?"* — the LLM will use the MCP tools to fetch your identity directly.
 
@@ -169,7 +181,8 @@ aman
 ├── askill       → skills      → what your AI MASTERS
 ├── aeval        → evaluation  → how GOOD your AI is
 ├── achannel     → channels    → WHERE your AI lives
-├── aman-mcp     → MCP server  → the bridge
+├── aman-mcp     → MCP server  → the bridge (31 tools)
+├── aman-agent   → agent UI    → chat frontend w/ memory
 └── aman-plugin  → plugin      → Claude Code glue  ← YOU ARE HERE
 ```
 
@@ -183,7 +196,8 @@ aman
 | Skills | [askill](https://github.com/amanasmuei/askill) | Domain expertise |
 | Evaluation | [aeval](https://github.com/amanasmuei/aeval) | Relationship tracking |
 | Channels | [achannel](https://github.com/amanasmuei/achannel) | Telegram, Discord, webhooks |
-| MCP Server | [aman-mcp](https://github.com/amanasmuei/aman-mcp) | 11 MCP tools for all layers |
+| MCP Server | [aman-mcp](https://github.com/amanasmuei/aman-mcp) | 31 MCP tools across all layers |
+| Agent UI | [aman-agent](https://github.com/amanasmuei/aman-agent) | Chat frontend with memory |
 | **Plugin** | **aman-plugin** | **Claude Code integration** |
 
 ---
