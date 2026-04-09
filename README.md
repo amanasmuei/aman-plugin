@@ -320,6 +320,34 @@ The hook also exports `AMAN_MCP_SCOPE=dev:plugin` so any MCP tool spawned during
 
 ---
 
+## Memory 101 — getting the most out of amem
+
+Your AI doesn't save everything automatically — it saves what you tell it to save, using natural language phrases the AI has been instructed to listen for. If you skip the phrases, memory silently fails.
+
+**The 30-second version:**
+
+```
+SAVE:    "remember that X"          → fact
+         "don't X" / "never X"      → correction (always wins)
+         "we decided X"             → decision
+         "I prefer X over Y"        → preference
+
+RECALL:  "what do you remember about X"
+         "check your memory for X"
+
+SESSION: "save a session narrative"   ← ⭐ preserves the reasoning path
+         "log this session"
+         "what did we figure out?"
+
+PRIVACY: wrap sensitive text in <private>...</private>
+```
+
+**The session narrative pattern** (⭐) is the most underused and most valuable. At the end of a substantial session, say *"save a session narrative"* — the AI writes a 300–500 word flowing-prose memory note covering what we tried, what worked, what didn't, what we decided, and why. Unlike scattered `memory_store` calls (which capture decisions), the narrative captures the **reasoning path** — the attempts, the dead ends, the pivot moments. Next session, recall on that narrative returns the whole story.
+
+**Full guide:** [amem prompt best practices](https://github.com/amanasmuei/amem/blob/main/docs/guides/prompt-best-practices.md) — phrase catalog in depth, memory tiers, privacy, debugging, and the philosophy of curated memory over raw transcripts.
+
+---
+
 ## Live Tools (`aman-mcp`)
 
 `aman-mcp` provides **31 MCP tools**, all scope-aware via `dev:plugin`.
