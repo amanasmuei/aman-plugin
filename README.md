@@ -124,11 +124,12 @@ claude plugin list
 The hook gives Claude your identity as **text in the prompt** — fast, zero tool calls. For **live read/write during the session** (updating identity on the fly, rule-checking a proposed action, etc.), install the MCP server:
 
 ```bash
-cd "$(claude plugins path aman-plugin 2>/dev/null || echo ~/.claude/plugins/aman-plugin)"
-node bin/install-mcp.mjs
+node ~/.claude/plugins/cache/aman/aman-plugin/*/bin/install-mcp.mjs
 ```
 
 This is **idempotent**, **preserves any other MCP servers** in your config, and works on macOS, Linux, and Windows. It pins `@aman_asmuei/aman-mcp@^0.6.0` to prevent drift.
+
+> **Where does that path come from?** Claude Code caches marketplace-installed plugins at `~/.claude/plugins/cache/<marketplace>/<plugin>/<version>/`. Since this plugin ships in a marketplace named `aman`, the `*` glob picks whichever version is currently installed.
 
 ### Step 5 — Add persistent memory *(recommended)*
 
@@ -269,7 +270,7 @@ Then restart Claude Code.
 <summary><b>Uninstall aman-mcp</b></summary>
 
 ```bash
-node bin/uninstall-mcp.mjs
+node ~/.claude/plugins/cache/aman/aman-plugin/*/bin/uninstall-mcp.mjs
 ```
 
 </details>
@@ -358,9 +359,9 @@ Then restart Claude Code. See [CHANGELOG.md](CHANGELOG.md) for what changed.
 <summary><b>How do I uninstall everything?</b></summary>
 
 ```bash
-node bin/uninstall-mcp.mjs            # removes aman-mcp from ~/.claude.json
-claude plugin uninstall aman-plugin   # removes the plugin
-claude plugin marketplace remove aman # removes the marketplace entry
+node ~/.claude/plugins/cache/aman/aman-plugin/*/bin/uninstall-mcp.mjs  # removes aman-mcp from ~/.claude.json
+claude plugin uninstall aman-plugin                                  # removes the plugin
+claude plugin marketplace remove aman                                # removes the marketplace entry
 # (optional) remove ecosystem data:
 rm -rf ~/.acore ~/.arules ~/.amem ~/.aeval ~/.akit ~/.aflow ~/.askill
 ```
