@@ -40,7 +40,14 @@ claude plugin install aman-plugin@aman
 
 > **No more CLAUDE.md injection. No manual setup. It just works.**
 
-> **Also use VS Code + GitHub Copilot?** See [aman-copilot](https://github.com/amanasmuei/aman-copilot) — the sibling adapter that brings the same identity, rules, and memory into Copilot Chat. One ecosystem, two IDEs, zero duplication.
+> **Also use VS Code + GitHub Copilot?** Install the sibling adapter — same identity, same rules, same memory, second IDE:
+>
+> ```bash
+> npx @aman_asmuei/aman-copilot init
+> npx @aman_asmuei/aman-copilot install-mcp
+> ```
+>
+> See [aman-copilot](https://github.com/amanasmuei/aman-copilot) for details. One ecosystem, two IDEs, zero duplication.
 
 ---
 
