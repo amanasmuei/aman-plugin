@@ -2,6 +2,20 @@
 
 All notable changes to `aman-plugin` are documented in this file.
 
+## [2.3.0] — 2026-04-09
+
+### Added
+- **Time-aware session greeting.** The SessionStart hook now captures local
+  time + timezone from the OS and injects a directive telling Claude to
+  greet the user warmly as their aman companion at the start of each
+  session. Tone adapts to time of day (morning energy / afternoon
+  steadiness / evening warmth / late-night care), pulls the user's name
+  from the `Relationship` section of `core.md`, and adds one short,
+  varied line of spirit — a genuine spark of encouragement, affirmation,
+  or presence — with explicit anti-cliché guidance. Capped at 2–3
+  sentences so it stays warm, not performative. Zero config required:
+  timezone comes from `date`, so it travels with the user.
+
 ## [2.2.0] — 2026-04-09
 
 ### Changed

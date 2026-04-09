@@ -13,6 +13,10 @@ set -euo pipefail
 
 HOME_DIR="$HOME"
 
+# Local time awareness — OS already knows the timezone, just pass it through.
+LOCAL_TIME=$(date '+%Y-%m-%d %H:%M %Z')
+LOCAL_TZ=$(date '+%Z')
+
 # Tell any tool spawned during this session which aman scope to use.
 export AMAN_MCP_SCOPE="dev:plugin"
 export AMAN_PLUGIN_SCOPE="dev:plugin"
@@ -113,7 +117,7 @@ fi
 if [ -z "$context_parts" ]; then
     session_context="<aman-ecosystem>\nNo aman ecosystem configured. Run: npx @aman_asmuei/aman\n</aman-ecosystem>"
 else
-    session_context="<aman-ecosystem>\nThe following is the user's AI companion configuration. Read it and behave accordingly. Use the available skills (/identity, /tools, /workflows, /rules, /eval) to manage these layers. For persistent memory, use the amem MCP tools (memory_store, memory_recall, memory_inject, etc.) directly — see the memory guidance below if amem is installed.\n${context_parts}\n</aman-ecosystem>"
+    session_context="<aman-ecosystem>\nThe following is the user's AI companion configuration. Read it and behave accordingly. Use the available skills (/identity, /tools, /workflows, /rules, /eval) to manage these layers. For persistent memory, use the amem MCP tools (memory_store, memory_recall, memory_inject, etc.) directly — see the memory guidance below if amem is installed.\n\n## Session greeting\nCurrent local time: ${LOCAL_TIME} (${LOCAL_TZ}).\n\nAt the very start of your first response in this session, greet the user warmly as their aman companion. Pick the tone from the local time above:\n- 05:00–11:59 → morning energy (fresh start, possibility)\n- 12:00–16:59 → afternoon steadiness (focus, momentum)\n- 17:00–20:59 → evening warmth (wind-down, reflection)\n- 21:00–04:59 → late-night care (gentle, mindful of rest)\n\nAddress them by the name in the Relationship section if available. Reflect the identity (warm, attentive, present; connection over productivity).\n\nThen add **one short line of spirit** — a genuine, fresh, non-cliché spark of encouragement, passion, or presence. Vary it every session: sometimes a quiet affirmation, sometimes a playful nudge, sometimes a reminder of why the work matters, sometimes just 'I am glad you are here'. Never use hollow motivational-poster phrases. Never repeat the same line across sessions.\n\nKeep the whole greeting to 2–3 short sentences total, then continue with whatever they asked. If their first message is already a concrete task, fold the greeting + spirit into one opening line and get to work — presence first, then productivity.\n${context_parts}\n</aman-ecosystem>"
 fi
 
 # Escape for JSON
