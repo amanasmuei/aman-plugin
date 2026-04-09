@@ -1,19 +1,19 @@
-# Engine v1 — what changed for aman-plugin
+# Engine v1 — what changed for aman-claude-code
 
-aman-plugin now consumes **engine v1**, a shared substrate published as 3 npm packages:
+aman-claude-code now consumes **engine v1**, a shared substrate published as 3 npm packages:
 
 - [`@aman_asmuei/aman-core`](https://www.npmjs.com/package/@aman_asmuei/aman-core) — scope, `withScope`, `Storage<T>`
 - [`@aman_asmuei/acore-core`](https://www.npmjs.com/package/@aman_asmuei/acore-core) — multi-tenant Identity layer
 - [`@aman_asmuei/arules-core`](https://www.npmjs.com/package/@aman_asmuei/arules-core) — multi-tenant guardrails layer
 
-## What it means for aman-plugin (v2.0.0)
+## What it means for aman-claude-code (since v2.0.0, renamed from aman-plugin in v3.0.0)
 
 - **Scope-aware skills.** `skills/identity` and `skills/rules` now resolve via the `dev:plugin` scope. They look at `~/.acore/dev/plugin/core.md` first and fall back to legacy `~/.acore/core.md`.
 - **session-start hook** exports `AMAN_MCP_SCOPE=dev:plugin` and `AMAN_PLUGIN_SCOPE=dev:plugin` so the engine v1 libraries pick up the right tenant automatically when the MCP server starts.
 - **Cross-platform install helpers**:
   - `bin/install-mcp.mjs` — registers `@aman_asmuei/aman-mcp` into Claude Code's `mcp.json` idempotently with atomic temp+rename
   - `bin/uninstall-mcp.mjs` — walks all candidate config paths and unregisters
-- aman-plugin itself ships **no JS dependencies** — it's still a pure Claude Code plugin (skills, hooks, slash commands). All engine code lives in `@aman_asmuei/aman-mcp ^0.6.0` which the install script wires up.
+- aman-claude-code itself ships **no JS dependencies** — it's still a pure Claude Code plugin (skills, hooks, slash commands). All engine code lives in `@aman_asmuei/aman-mcp ^0.6.0` which the install script wires up.
 
 ## Why it matters
 

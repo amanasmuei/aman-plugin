@@ -3,8 +3,8 @@
 <br>
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://img.shields.io/badge/aman--plugin-Claude_Code-white?style=for-the-badge&labelColor=0d1117&color=58a6ff">
-  <img alt="aman-plugin" src="https://img.shields.io/badge/aman--plugin-Claude_Code-black?style=for-the-badge&labelColor=f6f8fa&color=24292f">
+  <source media="(prefers-color-scheme: dark)" srcset="https://img.shields.io/badge/aman--claude--code-Claude_Code-white?style=for-the-badge&labelColor=0d1117&color=58a6ff">
+  <img alt="aman-claude-code" src="https://img.shields.io/badge/aman--claude--code-Claude_Code-black?style=for-the-badge&labelColor=f6f8fa&color=24292f">
 </picture>
 
 ### The complete AI companion plugin for Claude Code.
@@ -25,29 +25,46 @@ Auto-loads your identity, memory, tools, workflows, guardrails, and skills — e
 
 ---
 
+> ### ⚠️ Renamed from `aman-plugin` (v3.0.0)
+>
+> This plugin was previously published as **`aman-plugin`**. Starting with **v3.0.0** it's renamed to **`aman-claude-code`** for consistency with the rest of the ecosystem (`aman-copilot`, `aman-cursor` in the roadmap, etc.). The GitHub repo `amanasmuei/aman-plugin` auto-redirects to `amanasmuei/aman-claude-code`, so clones and bookmarks still work.
+>
+> **Existing users:** reinstall under the new name:
+>
+> ```bash
+> claude plugin uninstall aman-plugin@aman
+> claude plugin marketplace remove aman
+> claude plugin marketplace add amanasmuei/aman-claude-code
+> claude plugin install aman-claude-code@aman
+> ```
+>
+> Your acore/arules/amem data at `~/.acore`, `~/.arules`, `~/.amem` is untouched — only the plugin wrapper is renamed. See [CHANGELOG.md](CHANGELOG.md#300) for the full migration guide and rationale.
+
+---
+
 ## The Problem
 
 Even with the aman ecosystem set up, you still have to manually inject identity files, remember which slash commands do what, and manage platform config files. The gap between *"ecosystem configured"* and *"AI actually loads it"* is annoying.
 
 ## The Solution
 
-**aman-plugin** bridges that gap for Claude Code. Install once, and your full AI ecosystem loads automatically every session — identity, rules, memory, tools, workflows, and skills.
+**aman-claude-code** bridges that gap for Claude Code. Install once, and your full AI ecosystem loads automatically every session — identity, rules, memory, tools, workflows, and skills.
 
 ```bash
-claude plugin marketplace add amanasmuei/aman-plugin
-claude plugin install aman-plugin@aman
+claude plugin marketplace add amanasmuei/aman-claude-code
+claude plugin install aman-claude-code@aman
 ```
 
 > **No more CLAUDE.md injection. No manual setup. It just works.**
 
-> **Also use VS Code + GitHub Copilot?** Install the sibling adapter — same identity, same rules, same memory, second IDE:
+> **Also use VS Code Copilot Chat or the Copilot CLI?** Install the sibling adapter — same identity, same rules, same memory, three surfaces:
 >
 > ```bash
-> npx @aman_asmuei/aman-copilot init
-> npx @aman_asmuei/aman-copilot install-mcp
+> npx @aman_asmuei/aman-copilot init              # any project
+> npx @aman_asmuei/aman-copilot install-mcp --all # VS Code + Copilot CLI
 > ```
 >
-> See [aman-copilot](https://github.com/amanasmuei/aman-copilot) for details. One ecosystem, two IDEs, zero duplication.
+> `--all` writes to both VS Code's `mcp.json` and Copilot CLI's `~/.copilot/mcp-config.json` in one call, seeds the `dev:copilot` scope from your existing aman-claude-code identity, and preserves any other MCP servers you have configured. See [aman-copilot](https://github.com/amanasmuei/aman-copilot) for details. One ecosystem, two IDEs, one terminal CLI, zero duplication.
 
 ---
 
@@ -101,10 +118,10 @@ Claude Code installs plugins from **marketplaces**. This repo ships its own mark
 
 ```bash
 # 1. Register this repo as a marketplace
-claude plugin marketplace add amanasmuei/aman-plugin
+claude plugin marketplace add amanasmuei/aman-claude-code
 
 # 2. Install the plugin from it
-claude plugin install aman-plugin@aman
+claude plugin install aman-claude-code@aman
 ```
 
 Claude Code registers the plugin and wires its `SessionStart` hook. From now on, the hook fires automatically on every session start, resume, clear, and compact.
@@ -112,14 +129,14 @@ Claude Code registers the plugin and wires its `SessionStart` hook. From now on,
 <details>
 <summary><b>Other ways to install</b></summary>
 
-**From inside Claude Code** — use the `/plugin` slash command, then pick `aman-plugin` after adding the marketplace.
+**From inside Claude Code** — use the `/plugin` slash command, then pick `aman-claude-code` after adding the marketplace.
 
 **From a local clone** — useful for development:
 
 ```bash
-git clone https://github.com/amanasmuei/aman-plugin ~/aman-plugin
-claude plugin marketplace add ~/aman-plugin
-claude plugin install aman-plugin@aman
+git clone https://github.com/amanasmuei/aman-claude-code ~/aman-claude-code
+claude plugin marketplace add ~/aman-claude-code
+claude plugin install aman-claude-code@aman
 ```
 
 **Verify the install:**
@@ -135,7 +152,7 @@ claude plugin list
 The hook gives Claude your identity as **text in the prompt** — fast, zero tool calls. For **live read/write during the session** (updating identity on the fly, rule-checking a proposed action, etc.), install the MCP server:
 
 ```bash
-node ~/.claude/plugins/cache/aman/aman-plugin/*/bin/install-mcp.mjs
+node ~/.claude/plugins/cache/aman/aman-claude-code/*/bin/install-mcp.mjs
 ```
 
 This is **idempotent**, **preserves any other MCP servers** in your config, and works on macOS, Linux, and Windows. It pins `@aman_asmuei/aman-mcp@^0.6.0` to prevent drift.
@@ -144,7 +161,7 @@ This is **idempotent**, **preserves any other MCP servers** in your config, and 
 
 ### Step 5 — Add persistent memory *(recommended)*
 
-Memory is provided by the **amem plugin** — a separate Claude Code plugin from the same ecosystem. Install it alongside aman-plugin:
+Memory is provided by the **amem plugin** — a separate Claude Code plugin from the same ecosystem. Install it alongside aman-claude-code:
 
 ```bash
 claude plugin marketplace add amanasmuei/amem
@@ -164,11 +181,11 @@ Then initialize the local database once:
 npx @aman_asmuei/amem@latest init
 ```
 
-Once `~/.amem/` exists, aman-plugin's session-start hook **auto-detects it** and injects memory-usage guidance. Claude will proactively use the amem MCP tools during every session.
+Once `~/.amem/` exists, aman-claude-code's session-start hook **auto-detects it** and injects memory-usage guidance. Claude will proactively use the amem MCP tools during every session.
 
 > **Heads up — `amem init` keeps running.** The first run downloads the embedding model and then **stays in the foreground as an MCP server**. Once you see lines like `Vector index built: N vectors` and `Embedding model loaded`, initialization is complete — **press `Ctrl+C` to exit**. Claude Code spawns its own amem process via the plugin when needed, so you don't need to keep this one running.
 
-> **Why two plugins?** aman-plugin handles identity, rules, tools, workflows, eval (the acore/arules/akit/aflow/aeval layers). amem-plugin handles persistent memory. They're complementary and have no overlap — together they form the full aman ecosystem for Claude Code.
+> **Why two plugins?** aman-claude-code handles identity, rules, tools, workflows, eval (the acore/arules/akit/aflow/aeval layers). amem-plugin handles persistent memory. They're complementary and have no overlap — together they form the full aman ecosystem for Claude Code.
 
 ### Step 6 — Verify
 
@@ -208,12 +225,12 @@ To pull the latest version from the marketplace:
 
 ```bash
 claude plugin marketplace update aman
-claude plugin update aman-plugin@aman
+claude plugin update aman-claude-code@aman
 ```
 
-Then `/reload-plugins` inside Claude Code (or restart). The first command re-fetches the marketplace manifest from GitHub; the second applies the new version to your install. Always use `aman-plugin@aman` (with the marketplace qualifier) — the bare `aman-plugin` will return *"Plugin not found"*.
+Then `/reload-plugins` inside Claude Code (or restart). The first command re-fetches the marketplace manifest from GitHub; the second applies the new version to your install. Always use `aman-claude-code@aman` (with the marketplace qualifier) — the bare `aman-claude-code` will return *"Plugin not found"*.
 
-> **Tip:** run `claude plugin list` to see what's installed and at which scope (`user` or `project`). If you see the same plugin listed twice, you probably installed it once globally and once inside a project — keep the `user` scope one and uninstall the other with `claude plugin uninstall aman-plugin@aman --scope project`.
+> **Tip:** run `claude plugin list` to see what's installed and at which scope (`user` or `project`). If you see the same plugin listed twice, you probably installed it once globally and once inside a project — keep the `user` scope one and uninstall the other with `claude plugin uninstall aman-claude-code@aman --scope project`.
 
 See [CHANGELOG.md](CHANGELOG.md) for what's new in each release.
 
@@ -251,7 +268,7 @@ After the initial bootstrap, **you don't need the CLI anymore**. The plugin's `i
 | *"what have I told you about testing?"* | Calls `memory_recall` |
 | *"log this session"* | Calls `eval_log` |
 
-No slash commands needed — the plugin's skills auto-trigger on natural language. You can also invoke them explicitly with `/aman-plugin:identity`, `/aman-plugin:rules`, etc.
+No slash commands needed — the plugin's skills auto-trigger on natural language. You can also invoke them explicitly with `/aman-claude-code:identity`, `/aman-claude-code:rules`, etc.
 
 > **Can I skip the CLI entirely?** Technically yes — Claude can call `identity_update_section` to build a fresh config from a prompt like *"set up my identity, I'm a developer, use the Pragmatist archetype"*. But you'll miss the visual archetype picker and auto-detection. For first-time setup, the 15-second CLI run is worth it.
 
@@ -351,7 +368,7 @@ Then restart Claude Code.
 <summary><b>Uninstall aman-mcp</b></summary>
 
 ```bash
-node ~/.claude/plugins/cache/aman/aman-plugin/*/bin/uninstall-mcp.mjs
+node ~/.claude/plugins/cache/aman/aman-claude-code/*/bin/uninstall-mcp.mjs
 ```
 
 </details>
@@ -429,10 +446,10 @@ Yes. The hook tries engine-v1 scope-aware paths first, then automatically falls 
 
 ```bash
 claude plugin marketplace update aman
-claude plugin update aman-plugin@aman
+claude plugin update aman-claude-code@aman
 ```
 
-> **Note:** always use the fully-qualified `aman-plugin@aman` form (plugin name + marketplace name). The bare `aman-plugin` will fail with *"Plugin not found"* because Claude Code needs the marketplace qualifier to disambiguate.
+> **Note:** always use the fully-qualified `aman-claude-code@aman` form (plugin name + marketplace name). The bare `aman-claude-code` will fail with *"Plugin not found"* because Claude Code needs the marketplace qualifier to disambiguate.
 
 Then restart Claude Code. See [CHANGELOG.md](CHANGELOG.md) for what changed.
 
@@ -442,8 +459,8 @@ Then restart Claude Code. See [CHANGELOG.md](CHANGELOG.md) for what changed.
 <summary><b>How do I uninstall everything?</b></summary>
 
 ```bash
-node ~/.claude/plugins/cache/aman/aman-plugin/*/bin/uninstall-mcp.mjs  # removes aman-mcp from ~/.claude.json
-claude plugin uninstall aman-plugin@aman                             # removes the plugin
+node ~/.claude/plugins/cache/aman/aman-claude-code/*/bin/uninstall-mcp.mjs  # removes aman-mcp from ~/.claude.json
+claude plugin uninstall aman-claude-code@aman                             # removes the plugin
 claude plugin marketplace remove aman                                # removes the marketplace entry
 # (optional) remove ecosystem data:
 rm -rf ~/.acore ~/.arules ~/.amem ~/.aeval ~/.akit ~/.aflow ~/.askill
@@ -467,7 +484,7 @@ aman
 ├── achannel     → channels    → WHERE your AI lives
 ├── aman-mcp     → MCP server  → the bridge (31 tools)
 ├── aman-agent   → agent UI    → chat frontend w/ memory
-├── aman-plugin  → plugin      → Claude Code glue  ← YOU ARE HERE
+├── aman-claude-code  → plugin      → Claude Code glue  ← YOU ARE HERE
 └── aman-copilot → plugin      → VS Code + GitHub Copilot Chat glue
 ```
 
@@ -483,7 +500,7 @@ aman
 | Channels | [achannel](https://github.com/amanasmuei/achannel) | Telegram, Discord, webhooks |
 | MCP Server | [aman-mcp](https://github.com/amanasmuei/aman-mcp) | 31 MCP tools across all layers |
 | Agent UI | [aman-agent](https://github.com/amanasmuei/aman-agent) | Chat frontend with memory |
-| **Claude Code** | **aman-plugin** | **Claude Code integration** |
+| **Claude Code** | **aman-claude-code** | **Claude Code integration** |
 | VS Code | [aman-copilot](https://github.com/amanasmuei/aman-copilot) | GitHub Copilot Chat integration |
 
 ---

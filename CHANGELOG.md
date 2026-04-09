@@ -1,6 +1,77 @@
 # Changelog
 
-All notable changes to `aman-plugin` are documented in this file.
+All notable changes to `aman-claude-code` (formerly `aman-plugin`) are
+documented in this file.
+
+## [3.0.0] — 2026-04-09
+
+**Renamed from `aman-plugin` to `aman-claude-code`.** This is a
+user-facing breaking change — existing installs must be removed and
+re-installed under the new name. Data in `~/.acore`, `~/.arules`,
+`~/.amem` is preserved; only the plugin wrapper is renamed.
+
+### Why
+
+The ecosystem previously had one plugin (`aman-plugin`) for Claude Code.
+The moment a second surface joined — `aman-copilot` for GitHub Copilot
+Chat + Copilot CLI — the name `aman-plugin` became the odd one out.
+Every other package in the ecosystem is named after the surface it
+adapts (`aman-copilot`, `aman-agent`, `aman-tg`, `aman-showcase`, ...),
+so the Claude Code plugin should be `aman-claude-code` for parity.
+
+More siblings are planned (`aman-cursor`, JetBrains, ...). Renaming now
+— with only aman-copilot as a companion — is far cheaper than renaming
+later once there are 4+ adapters.
+
+### Changed
+- Plugin name in `.claude-plugin/marketplace.json` and
+  `.claude-plugin/plugin.json`: `aman-plugin` → `aman-claude-code`
+- GitHub repository: `amanasmuei/aman-plugin` → `amanasmuei/aman-claude-code`
+  (GitHub auto-redirects old URLs, so existing clones and links still work)
+- All references in README updated to the new name
+- Plugin cache path: `~/.claude/plugins/cache/aman/aman-plugin/*/` →
+  `~/.claude/plugins/cache/aman/aman-claude-code/*/`
+- Slash command namespace: `/aman-plugin:*` → `/aman-claude-code:*`
+- Version bumped `2.3.1` → `3.0.0` to signal the breaking rename
+
+### Migration guide
+
+Existing users need three commands to migrate:
+
+```bash
+# 1. Uninstall the old plugin
+claude plugin uninstall aman-plugin@aman
+
+# 2. Remove the marketplace entry (so the new one can be added cleanly)
+claude plugin marketplace remove aman
+
+# 3. Re-add the marketplace and install under the new name
+claude plugin marketplace add amanasmuei/aman-claude-code
+claude plugin install aman-claude-code@aman
+```
+
+Then restart Claude Code. Your identity, rules, and memory are preserved
+throughout — they live in `~/.acore`, `~/.arules`, and `~/.amem`, which
+this plugin only reads from.
+
+If you had previously installed `aman-mcp` via the old cache path:
+
+```bash
+# Old
+node ~/.claude/plugins/cache/aman/aman-plugin/*/bin/install-mcp.mjs
+
+# New
+node ~/.claude/plugins/cache/aman/aman-claude-code/*/bin/install-mcp.mjs
+```
+
+The new path is populated automatically after installing the plugin.
+
+### Not changed
+- The marketplace name (`aman`) is unchanged — only the plugin inside
+  the marketplace is renamed.
+- The session-start hook behavior is unchanged.
+- The ecosystem libraries (acore-core, arules-core, amem, aman-mcp) are
+  unchanged — this rename only affects the Claude Code plugin wrapper.
 
 ## [2.3.1] — 2026-04-09
 

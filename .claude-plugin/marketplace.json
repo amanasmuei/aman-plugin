@@ -9,14 +9,14 @@
   },
   "plugins": [
     {
-      "name": "aman-plugin",
+      "name": "aman-claude-code",
       "source": "./",
       "description": "Auto-loads your identity, memory, tools, workflows, guardrails, and skills — every session, zero setup.",
-      "version": "2.3.1",
-      "homepage": "https://github.com/amanasmuei/aman-plugin",
+      "version": "3.0.0",
+      "homepage": "https://github.com/amanasmuei/aman-claude-code",
       "license": "MIT",
       "category": "productivity",
-      "keywords": ["identity", "memory", "amem", "acore", "arules"]
+      "keywords": ["identity", "memory", "amem", "acore", "arules", "claude-code"]
     }
   ]
 }

@@ -1,13 +1,13 @@
 {
-  "name": "aman-plugin",
-  "version": "2.3.1",
+  "name": "aman-claude-code",
+  "version": "3.0.0",
   "description": "The complete AI companion plugin for Claude Code. Auto-loads your identity, memory, tools, workflows, guardrails, and skills — every session, zero setup.",
   "author": {
     "name": "amanasmuei",
     "url": "https://github.com/amanasmuei"
   },
-  "homepage": "https://github.com/amanasmuei/aman-plugin",
-  "repository": "https://github.com/amanasmuei/aman-plugin",
+  "homepage": "https://github.com/amanasmuei/aman-claude-code",
+  "repository": "https://github.com/amanasmuei/aman-claude-code",
   "license": "MIT",
   "keywords": [
     "aman",
