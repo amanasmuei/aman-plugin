@@ -40,6 +40,8 @@ claude plugin install aman-plugin@aman
 
 > **No more CLAUDE.md injection. No manual setup. It just works.**
 
+> **Also use VS Code + GitHub Copilot?** See [aman-copilot](https://github.com/amanasmuei/aman-copilot) — the sibling adapter that brings the same identity, rules, and memory into Copilot Chat. One ecosystem, two IDEs, zero duplication.
+
 ---
 
 ## Quickstart
@@ -458,7 +460,8 @@ aman
 ├── achannel     → channels    → WHERE your AI lives
 ├── aman-mcp     → MCP server  → the bridge (31 tools)
 ├── aman-agent   → agent UI    → chat frontend w/ memory
-└── aman-plugin  → plugin      → Claude Code glue  ← YOU ARE HERE
+├── aman-plugin  → plugin      → Claude Code glue  ← YOU ARE HERE
+└── aman-copilot → plugin      → VS Code + GitHub Copilot Chat glue
 ```
 
 | Layer | Package | What it does |
@@ -473,7 +476,8 @@ aman
 | Channels | [achannel](https://github.com/amanasmuei/achannel) | Telegram, Discord, webhooks |
 | MCP Server | [aman-mcp](https://github.com/amanasmuei/aman-mcp) | 31 MCP tools across all layers |
 | Agent UI | [aman-agent](https://github.com/amanasmuei/aman-agent) | Chat frontend with memory |
-| **Plugin** | **aman-plugin** | **Claude Code integration** |
+| **Claude Code** | **aman-plugin** | **Claude Code integration** |
+| VS Code | [aman-copilot](https://github.com/amanasmuei/aman-copilot) | GitHub Copilot Chat integration |
 
 ---
 
