@@ -19,7 +19,7 @@ Auto-loads your identity, memory, tools, workflows, guardrails, and skills — e
 [![Tests](https://img.shields.io/badge/tests-20%20passing-brightgreen.svg?style=flat-square)](./test/test-hook.sh)
 [![Engine](https://img.shields.io/badge/engine-v1-informational.svg?style=flat-square)](./docs/engine-v1.md)
 
-[Quickstart](#quickstart) · [Updating](#updating) · [What It Does](#what-it-does) · [Slash Commands](#slash-commands) · [Live Tools](#live-tools-aman-mcp) · [Troubleshooting](#troubleshooting) · [Ecosystem](#the-ecosystem)
+[Quickstart](#quickstart) · [Updating](#updating) · [Managing Your AI](#managing-your-ai) · [Slash Commands](#slash-commands) · [Live Tools](#live-tools-aman-mcp) · [Troubleshooting](#troubleshooting) · [Ecosystem](#the-ecosystem)
 
 </div>
 
@@ -205,6 +205,44 @@ Then `/reload-plugins` inside Claude Code (or restart). The first command re-fet
 > **Tip:** run `claude plugin list` to see what's installed and at which scope (`user` or `project`). If you see the same plugin listed twice, you probably installed it once globally and once inside a project — keep the `user` scope one and uninstall the other with `claude plugin uninstall aman-plugin@aman --scope project`.
 
 See [CHANGELOG.md](CHANGELOG.md) for what's new in each release.
+
+---
+
+## Managing Your AI
+
+Once the plugin is installed, you have **two ways** to manage your identity, rules, and memory — use whichever feels natural.
+
+### First-time setup → use the CLI
+
+The `npx @aman_asmuei/acore` wizard gives you the best onboarding:
+
+- Auto-detected name from `git config`
+- Auto-detected platform (writes to the right file for Claude Code, Cursor, etc.)
+- **Visual archetype picker** with all 25 options
+- Creates the identity file at the correct scope-aware path
+
+```bash
+npx @aman_asmuei/acore         # identity — one-time, 15 seconds
+npx @aman_asmuei/arules init   # guardrails — one-time
+```
+
+### Day-to-day → just talk to Claude
+
+After the initial bootstrap, **you don't need the CLI anymore**. The plugin's `identity`, `rules`, `tools`, `workflows`, and `eval` skills — combined with the `aman-mcp` live tools from [Step 4](#step-4--install-live-tools-aman-mcp) — let Claude read and write your ecosystem files directly from inside any conversation:
+
+| Just say | Claude does |
+|:---|:---|
+| *"what do you know about me?"* | Calls `identity_read`, reads your personality aloud |
+| *"update my personality to The Mentor"* | Calls `identity_update_section` |
+| *"add a boundary: never force-push to main"* | Calls `rules_add` |
+| *"is this action allowed?"* | Calls `rules_check` against your guardrails |
+| *"remember that I prefer pnpm over npm"* | Calls `memory_store` (requires amem plugin) |
+| *"what have I told you about testing?"* | Calls `memory_recall` |
+| *"log this session"* | Calls `eval_log` |
+
+No slash commands needed — the plugin's skills auto-trigger on natural language. You can also invoke them explicitly with `/aman-plugin:identity`, `/aman-plugin:rules`, etc.
+
+> **Can I skip the CLI entirely?** Technically yes — Claude can call `identity_update_section` to build a fresh config from a prompt like *"set up my identity, I'm a developer, use the Pragmatist archetype"*. But you'll miss the visual archetype picker and auto-detection. For first-time setup, the 15-second CLI run is worth it.
 
 ---
 
