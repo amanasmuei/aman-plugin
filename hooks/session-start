@@ -87,7 +87,8 @@ amem_dir="${HOME_DIR}/.amem"
 if [ -d "$amem_dir" ]; then
     amem_guidance='# amem — Persistent Memory (active)
 
-You have access to **amem**, a persistent memory MCP server. Use it proactively.
+You have access to **amem**, a persistent memory MCP server.
+**amem is your primary memory system.** Claude auto-memory is a secondary input — it gets absorbed into amem on startup via sync. For all recall and storage, use amem MCP tools.
 
 ## Session start
 1. Call `memory_inject` with the current task topic — surfaces corrections (MUST follow) and decisions.
@@ -99,10 +100,23 @@ You have access to **amem**, a persistent memory MCP server. Use it proactively.
 - **Decisions** ("we chose", "let'\''s go with"): `memory_store`, type=decision, confidence=0.9.
 - **Rejections of your suggestion**: store as correction with the reason.
 - **Every ~10 exchanges**: call `memory_extract` to batch insights.
+- You may also write Claude auto-memory — that'\''s fine, it syncs into amem next startup. But **never rely on auto-memory for recall** — always use `memory_recall` / `memory_inject`.
+
+## Session end
+When the user ends a substantial session or says goodbye:
+1. Call `memory_summarize` to store a session summary.
+2. Call `memory_sync` with source="copilot", direction="out", dryRun=false — pushes updated memories to copilot-instructions.md so the next Copilot session has fresh context.
 
 ## Recall
 - `memory_recall` (compact, default) → `memory_detail` for full content.
 - `memory_search` for exact matches; `memory_multi_recall` for 4-strategy search.
+- **Do NOT rely on Claude auto-memory for recall** — it'\''s a subset. amem has memories from Copilot sessions, team syncs, and reflections that auto-memory doesn'\''t.
+
+## Cross-surface sync
+amem is the shared brain across Claude Code and VS Code Copilot Chat:
+- **Startup**: `amem-cli sync` absorbs Claude auto-memory → amem (already done).
+- **Session end**: `memory_sync copilot/out` pushes amem → copilot-instructions.md.
+- Memories stored in Copilot sessions via MCP are already in amem — visible here immediately via `memory_recall`.
 
 ## Privacy
 - Wrap sensitive text in `<private>...</private>` — stripped before storage.
