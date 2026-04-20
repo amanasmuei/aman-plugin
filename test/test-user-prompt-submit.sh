@@ -105,6 +105,26 @@ else
     fail "hex redaction did not happen" "sugg=$(cat "$SUGGESTIONS")"
 fi
 
+# --- Test: rejected hash prevents re-promotion ---
+reset_state
+# Pre-populate .rejected-hashes with the sha256 of the normalized phrase.
+# Note: hook strips trailing punctuation via `sed 's/[.,;:!?]*$//'` when
+# computing PHRASE_KEY, so we hash the already-normalized form (no `?`).
+REJECTED_PHRASE_KEY="don't you love this"
+HASH=$(printf '%s' "$REJECTED_PHRASE_KEY" | bash -c 'source "'"$SCRIPT_DIR"'/../hooks/lib/compat.sh"; sha256_hex')
+echo "$HASH" > "$REJECTED"
+
+# Now fire the same phrase 3 times — should NOT promote
+CLAUDE_USER_PROMPT="don't you love this?" bash "$HOOK_PATH" >/dev/null
+CLAUDE_USER_PROMPT="don't you love this?" bash "$HOOK_PATH" >/dev/null
+CLAUDE_USER_PROMPT="don't you love this?" bash "$HOOK_PATH" >/dev/null
+
+if ! grep -q "Status: pending" "$SUGGESTIONS"; then
+    pass "rejected-hash phrase is never promoted"
+else
+    fail "rejected phrase was promoted despite hash block" "sugg=$(cat "$SUGGESTIONS")"
+fi
+
 echo "---"
 echo "PASS: $PASS  FAIL: $FAIL"
 [ "$FAIL" -eq 0 ]

@@ -53,6 +53,15 @@ PHRASE=$(printf '%s' "$MSG" | tr -s ' \t\n' ' ' | sed 's/[.,;:!?]*$//' | cut -c1
 # Lowercase the phrase for stable tally lookup
 PHRASE_KEY=$(printf '%s' "$PHRASE" | tr '[:upper:]' '[:lower:]')
 
+# Check rejected-hashes blocklist. If user has rejected this phrase before,
+# never re-surface it.
+if [ -s "$REJECTED" ]; then
+    HASH=$(printf '%s' "$PHRASE_KEY" | sha256_hex)
+    if grep -qxF "$HASH" "$REJECTED"; then
+        exit 0
+    fi
+fi
+
 NOW=$(date +%s)
 
 # --- Atomic tally read-modify-write ---
