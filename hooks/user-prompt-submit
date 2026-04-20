@@ -22,6 +22,21 @@ chmod 600 "$TALLY" "$SUGGESTIONS" "$REJECTED"
 MSG="${CLAUDE_USER_PROMPT:-$(cat 2>/dev/null || true)}"
 [ -z "$MSG" ] && exit 0
 
+# Strip <private>...</private> regions before any processing.
+# Handles single-line (inline) and multi-line forms.
+MSG=$(printf '%s' "$MSG" | sed 's|<private>[^<]*</private>||g; /<private>/,/<\/private>/d')
+
+# Redact secret-shaped strings (API keys, tokens, long hex).
+# Ordered most-specific → least so sk-... matches before generic [A-Za-z0-9_-]{32,}.
+MSG=$(printf '%s' "$MSG" | sed -E \
+    -e 's/sk-[A-Za-z0-9]+/[REDACTED]/g' \
+    -e 's/ghp_[A-Za-z0-9]+/[REDACTED]/g' \
+    -e 's/gho_[A-Za-z0-9]+/[REDACTED]/g' \
+    -e 's/[A-Fa-f0-9]{40,}/[REDACTED]/g' \
+    -e 's/[A-Za-z0-9_-]{32,}/[REDACTED]/g')
+
+[ -z "$MSG" ] && exit 0
+
 LOWER=$(printf '%s' "$MSG" | tr '[:upper:]' '[:lower:]')
 
 EXPLICIT_RE="(^|[^a-z])(from now on|always|never|by default|going forward|stop doing|don'?t ever)"
@@ -34,7 +49,7 @@ elif ! echo "$LOWER" | grep -qE "$AMBIENT_RE"; then
     exit 0
 fi
 
-PHRASE=$(printf '%s' "$MSG" | tr -s ' \t\n' ' ' | sed 's/[[:punct:]]*$//' | cut -c1-100)
+PHRASE=$(printf '%s' "$MSG" | tr -s ' \t\n' ' ' | sed 's/[.,;:!?]*$//' | cut -c1-100)
 # Lowercase the phrase for stable tally lookup
 PHRASE_KEY=$(printf '%s' "$PHRASE" | tr '[:upper:]' '[:lower:]')
 
