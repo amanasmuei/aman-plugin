@@ -68,6 +68,33 @@ claude plugin install aman-claude-code@aman
 
 ---
 
+## Passive rule observer (opt-in, v3.2.0-alpha.1+)
+
+Set `AMAN_OBSERVER_ENABLED=1` in your shell to enable the passive observer. It watches your Claude Code conversations for repeated corrections (e.g., "don't commit without tests" said 3 times across sessions) and queues them as rule suggestions.
+
+On the next session start, you'll see one line: `3 rule suggestions pending — run /rules review`. No mid-conversation interrupts; zero LLM cost.
+
+Review suggestions with:
+
+- `/rules review --list` — show pending suggestions with index
+- `/rules accept <n>` — promote suggestion N to a real rule (calls arules-core)
+- `/rules reject <n>` — dismiss; won't resurface (sha256-blocklisted)
+
+The observer stores ephemeral state in `~/.arules/dev/plugin/.tally.tsv` (drained on promotion) and a human-readable queue in `~/.arules/dev/plugin/suggestions.md`. See `docs/superpowers/specs/2026-04-20-passive-hook-observer-design.md` for the full design.
+
+### Opt-in, not default
+
+The observer is gated behind `AMAN_OBSERVER_ENABLED=1` for the alpha. After one week of real use without major issues, v3.2.0 will default-enable (with an `AMAN_OBSERVER_DISABLED=1` off-switch preserved indefinitely).
+
+### Known limitations (v3.2.0-alpha.1)
+
+- English-only correction phrases; Bahasa Malaysia and other languages planned.
+- Writes only to the `dev:plugin` scope; per-repo scopes planned.
+- No LLM-based deduplication of semantically-equivalent phrases.
+- `/rules review` ships `--list` + index-based accept/reject; a fully interactive readline loop lands in v3.2.0-beta.
+
+---
+
 ## Quickstart
 
 Six steps. Under five minutes.
