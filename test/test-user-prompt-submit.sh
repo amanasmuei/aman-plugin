@@ -165,6 +165,18 @@ else
     fail "unmatched did not fall through to general"
 fi
 
+# --- Test: AMAN_OBSERVER_ENABLED unset → hook is no-op ---
+reset_state
+unset AMAN_OBSERVER_ENABLED
+CLAUDE_USER_PROMPT="from now on, never commit directly" bash "$HOOK_PATH" >/dev/null
+
+if [ ! -s "$TALLY" ] && [ ! -s "$SUGGESTIONS" ]; then
+    pass "disabled observer is a no-op"
+else
+    fail "observer ran despite being disabled" "tally=$(cat "$TALLY")"
+fi
+export AMAN_OBSERVER_ENABLED=1
+
 echo "---"
 echo "PASS: $PASS  FAIL: $FAIL"
 [ "$FAIL" -eq 0 ]
