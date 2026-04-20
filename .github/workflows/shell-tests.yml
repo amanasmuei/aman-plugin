@@ -1,0 +1,29 @@
+name: Shell tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  shell:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Make hook scripts executable
+        run: |
+          chmod +x hooks/user-prompt-submit hooks/session-start hooks/run-hook.cmd || true
+      - name: Run test-compat.sh
+        run: bash test/test-compat.sh
+      - name: Run test-user-prompt-submit.sh
+        run: bash test/test-user-prompt-submit.sh
+      - name: Run test-session-start-notice.sh
+        run: bash test/test-session-start-notice.sh
+      - name: Run test-hook.sh
+        run: bash test/test-hook.sh
+      - name: Run test-e2e-observer.sh
+        run: bash test/test-e2e-observer.sh
