@@ -11,6 +11,18 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=lib/compat.sh
 source "$SCRIPT_DIR/lib/compat.sh"
 
+# Category heuristic — keyword-based, first match wins, small v1 table.
+guess_category() {
+    local p="$1"
+    case "$p" in
+        *password*|*token*|*secret*|*api.key*|*credential*) echo "privacy" ;;
+        *test*|*lint*|*build*|*' ci '*) echo "workflow" ;;
+        *commit*|*push*|*pull*|*merge*|*rebase*|*branch*) echo "git" ;;
+        *database*|*' db '*|*migration*|*sql*|*schema*) echo "data" ;;
+        *) echo "general" ;;
+    esac
+}
+
 SCOPE_DIR="$HOME/.arules/dev/plugin"
 mkdir -p "$SCOPE_DIR"
 TALLY="$SCOPE_DIR/.tally.tsv"
@@ -105,12 +117,14 @@ SHORT=$(printf '%s' "$PHRASE" | cut -c1-60)
 OCC_LINE="- Occurrences: $NEW_COUNT"
 [ "$NEW_EXPLICIT" -eq 1 ] && OCC_LINE="$OCC_LINE (explicit marker)"
 
+CATEGORY=$(guess_category "$PHRASE_KEY")
+
 {
     printf '\n## %s — %s\n' "$DATE" "$SHORT"
     printf -- '- Phrase: %s\n' "$PHRASE"
     printf '%s\n' "$OCC_LINE"
     printf -- '- First seen: %s\n' "$FIRST_DATE"
-    printf -- '- Category (suggested): general\n'
+    printf -- '- Category (suggested): %s\n' "$CATEGORY"
     printf -- '- Status: pending\n'
 } >> "$SUGGESTIONS"
 

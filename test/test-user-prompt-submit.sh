@@ -125,6 +125,46 @@ else
     fail "rejected phrase was promoted despite hash block" "sugg=$(cat "$SUGGESTIONS")"
 fi
 
+# --- Test: git-keyword phrases get category=git ---
+reset_state
+CLAUDE_USER_PROMPT="from now on, never commit directly to main" bash "$HOOK_PATH" >/dev/null
+
+if grep -q "Category (suggested): git" "$SUGGESTIONS"; then
+    pass "commit keyword → category git"
+else
+    fail "commit keyword did not route to git" "sugg=$(cat "$SUGGESTIONS")"
+fi
+
+# --- Test: test-keyword → workflow ---
+reset_state
+CLAUDE_USER_PROMPT="from now on, always run tests before pushing" bash "$HOOK_PATH" >/dev/null
+
+if grep -q "Category (suggested): workflow" "$SUGGESTIONS"; then
+    pass "test keyword → category workflow"
+else
+    fail "test keyword did not route to workflow"
+fi
+
+# --- Test: secret keyword → privacy ---
+reset_state
+CLAUDE_USER_PROMPT="from now on, never log passwords" bash "$HOOK_PATH" >/dev/null
+
+if grep -q "Category (suggested): privacy" "$SUGGESTIONS"; then
+    pass "password keyword → category privacy"
+else
+    fail "password keyword did not route to privacy"
+fi
+
+# --- Test: no matching keyword → general ---
+reset_state
+CLAUDE_USER_PROMPT="from now on, never skip breakfast" bash "$HOOK_PATH" >/dev/null
+
+if grep -q "Category (suggested): general" "$SUGGESTIONS"; then
+    pass "unmatched keyword → category general"
+else
+    fail "unmatched did not fall through to general"
+fi
+
 echo "---"
 echo "PASS: $PASS  FAIL: $FAIL"
 [ "$FAIL" -eq 0 ]
