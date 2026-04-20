@@ -34,20 +34,67 @@ elif ! echo "$LOWER" | grep -qE "$AMBIENT_RE"; then
     exit 0
 fi
 
-# Minimal promotion path (will be expanded in Task 3+)
 PHRASE=$(printf '%s' "$MSG" | tr -s ' \t\n' ' ' | sed 's/[[:punct:]]*$//' | cut -c1-100)
+# Lowercase the phrase for stable tally lookup
+PHRASE_KEY=$(printf '%s' "$PHRASE" | tr '[:upper:]' '[:lower:]')
+
+NOW=$(date +%s)
+
+# --- Atomic tally read-modify-write ---
+update_tally() {
+    local existing new_count first new_explicit
+    existing=$(grep -F "$(printf '%s\t' "$PHRASE_KEY")" "$TALLY" || true)
+    if [ -n "$existing" ]; then
+        local old_count old_explicit
+        old_count=$(printf '%s' "$existing" | cut -f2)
+        first=$(printf '%s' "$existing" | cut -f3)
+        old_explicit=$(printf '%s' "$existing" | cut -f5)
+        new_count=$((old_count + 1))
+        new_explicit=$((old_explicit | IS_EXPLICIT))
+        grep -v -F "$(printf '%s\t' "$PHRASE_KEY")" "$TALLY" > "$TALLY.new" || true
+        printf '%s\t%d\t%s\t%d\t%d\n' "$PHRASE_KEY" "$new_count" "$first" "$NOW" "$new_explicit" >> "$TALLY.new"
+        mv "$TALLY.new" "$TALLY"
+    else
+        new_count=1
+        first=$NOW
+        new_explicit=$IS_EXPLICIT
+        printf '%s\t%d\t%s\t%d\t%d\n' "$PHRASE_KEY" 1 "$NOW" "$NOW" "$IS_EXPLICIT" >> "$TALLY"
+    fi
+    printf '%d\t%d\t%s' "$new_count" "$new_explicit" "$first"
+}
+
+RESULT=$(with_flock "$TALLY.lock" update_tally)
+NEW_COUNT=$(printf '%s' "$RESULT" | cut -f1)
+NEW_EXPLICIT=$(printf '%s' "$RESULT" | cut -f2)
+FIRST_SEEN=$(printf '%s' "$RESULT" | cut -f3)
+
+# Threshold check: promote if explicit OR count >= 3
+if [ "$NEW_EXPLICIT" -eq 0 ] && [ "$NEW_COUNT" -lt 3 ]; then
+    exit 0
+fi
+
+# --- Promotion to suggestions.md ---
 DATE=$(date '+%Y-%m-%d %H:%M')
+FIRST_DATE=$(date -r "$FIRST_SEEN" '+%Y-%m-%d %H:%M' 2>/dev/null || date -d "@$FIRST_SEEN" '+%Y-%m-%d %H:%M')
 SHORT=$(printf '%s' "$PHRASE" | cut -c1-60)
 
-if [ "$IS_EXPLICIT" -eq 1 ]; then
-    {
-        printf '\n## %s — %s\n' "$DATE" "$SHORT"
-        printf -- '- Phrase: %s\n' "$PHRASE"
-        printf -- '- Occurrences: 1 (explicit marker)\n'
-        printf -- '- First seen: %s\n' "$DATE"
-        printf -- '- Category (suggested): general\n'
-        printf -- '- Status: pending\n'
-    } >> "$SUGGESTIONS"
-fi
+OCC_LINE="- Occurrences: $NEW_COUNT"
+[ "$NEW_EXPLICIT" -eq 1 ] && OCC_LINE="$OCC_LINE (explicit marker)"
+
+{
+    printf '\n## %s — %s\n' "$DATE" "$SHORT"
+    printf -- '- Phrase: %s\n' "$PHRASE"
+    printf '%s\n' "$OCC_LINE"
+    printf -- '- First seen: %s\n' "$FIRST_DATE"
+    printf -- '- Category (suggested): general\n'
+    printf -- '- Status: pending\n'
+} >> "$SUGGESTIONS"
+
+# --- Clear tally row (phrase has graduated) ---
+clear_tally_row() {
+    grep -v -F "$(printf '%s\t' "$PHRASE_KEY")" "$TALLY" > "$TALLY.new" || true
+    mv "$TALLY.new" "$TALLY"
+}
+with_flock "$TALLY.lock" clear_tally_row
 
 exit 0

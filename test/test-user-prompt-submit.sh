@@ -38,6 +38,39 @@ else
     fail "explicit marker did NOT promote at count=1" "suggestions.md: $(cat "$SUGGESTIONS")"
 fi
 
+# --- Test: ambient correction does NOT promote at count=1 ---
+reset_state
+CLAUDE_USER_PROMPT="don't commit directly" bash "$HOOK_PATH" >/dev/null
+
+if ! grep -q "Status: pending" "$SUGGESTIONS"; then
+    pass "ambient correction stays in tally at count=1"
+else
+    fail "ambient correction promoted too early" "suggestions.md: $(cat "$SUGGESTIONS")"
+fi
+
+# --- Test: ambient correction DOES NOT promote at count=2 ---
+reset_state
+CLAUDE_USER_PROMPT="don't commit directly" bash "$HOOK_PATH" >/dev/null
+CLAUDE_USER_PROMPT="don't commit directly" bash "$HOOK_PATH" >/dev/null
+
+if ! grep -q "Status: pending" "$SUGGESTIONS"; then
+    pass "ambient correction stays in tally at count=2"
+else
+    fail "ambient correction promoted at count=2" "suggestions.md: $(cat "$SUGGESTIONS")"
+fi
+
+# --- Test: ambient correction DOES promote at count=3 ---
+reset_state
+CLAUDE_USER_PROMPT="don't commit directly" bash "$HOOK_PATH" >/dev/null
+CLAUDE_USER_PROMPT="don't commit directly" bash "$HOOK_PATH" >/dev/null
+CLAUDE_USER_PROMPT="don't commit directly" bash "$HOOK_PATH" >/dev/null
+
+if grep -q "Status: pending" "$SUGGESTIONS" && grep -q "Occurrences: 3" "$SUGGESTIONS"; then
+    pass "ambient correction promotes at count=3 with Occurrences: 3"
+else
+    fail "ambient correction did NOT promote at count=3" "suggestions.md: $(cat "$SUGGESTIONS")"
+fi
+
 echo "---"
 echo "PASS: $PASS  FAIL: $FAIL"
 [ "$FAIL" -eq 0 ]
