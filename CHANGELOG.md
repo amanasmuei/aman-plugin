@@ -3,6 +3,31 @@
 All notable changes to `aman-claude-code` (formerly `aman-plugin`) are
 documented in this file.
 
+## 3.2.0-alpha.1 — 2026-04-20
+
+### Added
+- **Passive rule observer** (opt-in via `AMAN_OBSERVER_ENABLED=1`). Watches
+  Claude Code conversations for repeated corrections and proposes them as
+  rules. Session-start notice shows pending count; `/rules review --list` +
+  `/rules accept|reject <n>` lets users act on proposals. Zero LLM cost.
+- `UserPromptSubmit` hook wired in `hooks/hooks.json`.
+- New `/rules review`, `/rules accept`, `/rules reject` commands in aman-agent.
+- Cross-platform `flock` / `sha256sum` shims in `hooks/lib/compat.sh`.
+- Shell-test CI on Ubuntu + macOS.
+
+### Notes
+- Alpha gating: set `AMAN_OBSERVER_ENABLED=1` to try. Default-enable targeted
+  for v3.2.0 once alpha proves stable.
+- English-only correction phrases in v1; Bahasa Malaysia markers planned.
+- Writes only to `dev:plugin` scope for v1; per-repo scopes planned.
+- `/rules review` ships `--list` + index-based accept/reject; fully interactive
+  readline loop lands in v3.2.0-beta.
+
+### Design
+See `docs/superpowers/specs/2026-04-20-passive-hook-observer-design.md`.
+
+---
+
 ## [3.1.0] — 2026-04-09
 
 **Session narratives come to Claude Code.** New `/session-narrative`
