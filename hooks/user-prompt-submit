@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+# UserPromptSubmit hook for aman-claude-code: passive correction observer.
+# See docs/superpowers/specs/2026-04-20-passive-hook-observer-design.md
+
+set -euo pipefail
+
+# Env gate — opt-in for v3.2.0-alpha
+[ "${AMAN_OBSERVER_ENABLED:-0}" = "1" ] || exit 0
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=lib/compat.sh
+source "$SCRIPT_DIR/lib/compat.sh"
+
+SCOPE_DIR="$HOME/.arules/dev/plugin"
+mkdir -p "$SCOPE_DIR"
+TALLY="$SCOPE_DIR/.tally.tsv"
+SUGGESTIONS="$SCOPE_DIR/suggestions.md"
+REJECTED="$SCOPE_DIR/.rejected-hashes"
+touch "$TALLY" "$SUGGESTIONS" "$REJECTED"
+chmod 600 "$TALLY" "$SUGGESTIONS" "$REJECTED"
+
+MSG="${CLAUDE_USER_PROMPT:-$(cat 2>/dev/null || true)}"
+[ -z "$MSG" ] && exit 0
+
+LOWER=$(printf '%s' "$MSG" | tr '[:upper:]' '[:lower:]')
+
+EXPLICIT_RE="(^|[^a-z])(from now on|always|never|by default|going forward|stop doing|don'?t ever)"
+AMBIENT_RE="(^|[^a-z])(don'?t|stop|no,? not|that'?s wrong|actually,?)"
+
+IS_EXPLICIT=0
+if echo "$LOWER" | grep -qE "$EXPLICIT_RE"; then
+    IS_EXPLICIT=1
+elif ! echo "$LOWER" | grep -qE "$AMBIENT_RE"; then
+    exit 0
+fi
+
+# Minimal promotion path (will be expanded in Task 3+)
+PHRASE=$(printf '%s' "$MSG" | tr -s ' \t\n' ' ' | sed 's/[[:punct:]]*$//' | cut -c1-100)
+DATE=$(date '+%Y-%m-%d %H:%M')
+SHORT=$(printf '%s' "$PHRASE" | cut -c1-60)
+
+if [ "$IS_EXPLICIT" -eq 1 ]; then
+    {
+        printf '\n## %s — %s\n' "$DATE" "$SHORT"
+        printf -- '- Phrase: %s\n' "$PHRASE"
+        printf -- '- Occurrences: 1 (explicit marker)\n'
+        printf -- '- First seen: %s\n' "$DATE"
+        printf -- '- Category (suggested): general\n'
+        printf -- '- Status: pending\n'
+    } >> "$SUGGESTIONS"
+fi
+
+exit 0
