@@ -134,6 +134,21 @@ amem is authoritative over Claude auto-memory when they conflict (it has version
     context_parts="${context_parts}\n\n---\n\n${amem_guidance}"
 fi
 
+# Passive-observer: surface pending rule suggestions (one line, no pressure).
+SUGGESTIONS_FILE="$HOME/.arules/dev/plugin/suggestions.md"
+if [ -f "$SUGGESTIONS_FILE" ]; then
+    PENDING=$(grep -c '^- Status: pending' "$SUGGESTIONS_FILE" 2>/dev/null || true)
+    PENDING=${PENDING:-0}
+    if [ "$PENDING" -gt 0 ]; then
+        if [ "$PENDING" -eq 1 ]; then
+            NOTICE="$PENDING rule suggestion pending — run /rules review"
+        else
+            NOTICE="$PENDING rule suggestions pending — run /rules review"
+        fi
+        context_parts="${context_parts}\n\n<aman-suggestion-notice>\n${NOTICE}\n</aman-suggestion-notice>"
+    fi
+fi
+
 # Build the context message
 if [ -z "$context_parts" ]; then
     session_context="<aman-ecosystem>\nNo aman ecosystem configured. Run: npx @aman_asmuei/aman\n</aman-ecosystem>"
