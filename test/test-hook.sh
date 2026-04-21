@@ -335,6 +335,31 @@ else
   fail "Missing Recent Sessions maintenance block"
 fi
 
+# Two-sided conditional (alpha.10): wake-word block must include explicit
+# NEGATIVE-fire cases so LLM gates correctly on wake-word + task vs pure
+# wake-word. Prevents alpha.8-style loose-trigger regression.
+if echo "$CONTEXT" | grep -q "do NOT fire\|MUST NOT fire"; then
+  pass "Wake-word block includes explicit negative-fire instruction"
+else
+  fail "Missing explicit 'do NOT fire' clause"
+fi
+
+# Need ≥3 distinct negative examples (not just one parenthetical aside).
+# `|| echo 0` guards against `set -e` exiting the script when grep finds nothing.
+NEG_COUNT=$(echo "$CONTEXT" | grep -cE "fix the login bug|what is the time|run the tests" || echo 0)
+if [ "$NEG_COUNT" -ge 3 ]; then
+  pass "Wake-word block lists multiple negative examples ($NEG_COUNT ≥ 3)"
+else
+  fail "Need ≥3 negative examples in wake-word conditional, found $NEG_COUNT"
+fi
+
+# Positive criterion must be specific: "your AI name alone", not just "alone" anywhere
+if echo "$CONTEXT" | grep -q "your AI name alone\|AI name alone"; then
+  pass "Wake-word positive match specifies 'your AI name alone'"
+else
+  fail "Positive match too loose — need 'your AI name alone' phrasing"
+fi
+
 rm -rf "$TMPDIR_A" 2>/dev/null || true
 
 # ---------- Test 13: Block B (tier loaders) injected when ecosystem exists ----------
