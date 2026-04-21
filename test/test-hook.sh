@@ -282,6 +282,31 @@ else
   fail "install-mcp.mjs does not pin aman-mcp version"
 fi
 
+# ---------- Test 12: Block A (wake-word briefing) injected when ecosystem exists ----------
+echo ""
+echo "Test 12: Wake-word briefing block present when ecosystem exists"
+TMPDIR_A=$(mktemp -d)
+mkdir -p "$TMPDIR_A/.acore/dev/plugin"
+echo "# Identity
+name: Sarah" > "$TMPDIR_A/.acore/dev/plugin/core.md"
+
+OUTPUT=$(HOME="$TMPDIR_A" bash "$HOOK_PATH" 2>&1)
+CONTEXT=$(echo "$OUTPUT" | jq -r '.additional_context')
+
+if echo "$CONTEXT" | grep -q "Wake-word briefing"; then
+  pass "Contains 'Wake-word briefing' heading when ecosystem exists"
+else
+  fail "Missing 'Wake-word briefing' heading"
+fi
+
+if echo "$CONTEXT" | grep -q "EXPLICIT briefing request"; then
+  pass "Contains Block A body signature"
+else
+  fail "Missing Block A body signature"
+fi
+
+rm -rf "$TMPDIR_A"
+
 # ---------- Summary ----------
 echo ""
 echo "================================"
