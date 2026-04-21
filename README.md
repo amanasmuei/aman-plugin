@@ -374,6 +374,20 @@ Always use the fully-qualified `aman-claude-code@aman` form — the bare name fa
 
 ---
 
+## Uninstall
+
+Removes the plugin and the aman MCP entry from Claude Code. **Your identity, rules, and memory at `~/.acore`, `~/.arules`, `~/.amem` are untouched** — they survive so you can reinstall or switch to `aman-copilot` without losing anything.
+
+```bash
+claude plugin uninstall aman-claude-code@aman
+claude plugin marketplace remove aman
+claude mcp remove aman 2>/dev/null || true
+```
+
+To also wipe the ecosystem data and per-project cards (full uninstall across all surfaces), see the [canonical guide in the aman umbrella README](https://github.com/amanasmuei/aman#uninstall--reset).
+
+---
+
 ## License
 
 [MIT](LICENSE)
