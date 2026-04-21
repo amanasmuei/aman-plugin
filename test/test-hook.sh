@@ -344,6 +344,35 @@ fi
 
 rm -rf "$TMPDIR_B" 2>/dev/null || true
 
+# ---------- Test 14: Blocks NOT injected when ecosystem is empty ----------
+echo ""
+echo "Test 14: Blocks absent when no ecosystem configured"
+TMPDIR_C=$(mktemp -d)
+# Empty HOME — no .acore, no .arules, no .aflow, nothing.
+
+OUTPUT=$(HOME="$TMPDIR_C" bash "$HOOK_PATH" 2>&1)
+CONTEXT=$(echo "$OUTPUT" | jq -r '.additional_context')
+
+if echo "$CONTEXT" | grep -q "Wake-word briefing"; then
+  fail "Block A leaked into no-ecosystem fallback"
+else
+  pass "Block A correctly absent when no ecosystem exists"
+fi
+
+if echo "$CONTEXT" | grep -q "Tier upgrades"; then
+  fail "Block B leaked into no-ecosystem fallback"
+else
+  pass "Block B correctly absent when no ecosystem exists"
+fi
+
+if echo "$CONTEXT" | grep -q "No aman ecosystem configured"; then
+  pass "Fallback message still present when no ecosystem"
+else
+  fail "Fallback message missing — regression"
+fi
+
+rm -rf "$TMPDIR_C" 2>/dev/null || true
+
 # ---------- Summary ----------
 echo ""
 echo "================================"
