@@ -184,6 +184,42 @@ Full catalog:
 
 If a layer is already installed, Claude asks before re-running.
 
+> **`load archetype` is special.** As of v3.2.0-alpha.4 the plugin no longer shells out to the interactive CLI for this phrase — Claude edits your `core.md` directly and shifts its own tone mid-session. No exit + restart required. See [Day-to-day verbs](#day-to-day-verbs--just-talk) below.
+
+### Day-to-day verbs — just talk
+
+Once layers are installed, you don't need `load` anymore. Say what you want in plain language — Claude maps your phrase to the right MCP tool on the `aman` server and handles it in-session:
+
+| You say | What happens |
+|:---|:---|
+| *"add rule: never force-push to main"* | `rules_add` (Claude classifies the category) |
+| *"can I delete this file?"* / *"is X allowed?"* | `rules_check` |
+| *"list my rules"* / *"list my skills"* / *"list tools"* | `rules_list` / `skill_list` / `tools_list` |
+| *"remove rule about X"* | `rules_remove` |
+| *"log this session as productive"* / *"record today"* | `eval_log` |
+| *"how are we doing?"* / *"show relationship report"* | `eval_report` |
+| *"we hit X today"* / *"milestone: Y"* | `eval_milestone` |
+| *"install testing skill"* / *"add security skill"* | `skill_install` |
+| *"search skills for X"* | `skill_search` |
+| *"add tool: github"* / *"install supabase tool"* | `tools_add` |
+| *"add workflow: code-review"* | `workflow_add` |
+| *"who am I?"* / *"show my profile"* | `identity_read` |
+| *"update my role to senior architect"* | `identity_update_section` |
+| *"remember that I use pnpm"* / *"don't commit secrets"* | `memory_store` |
+| *"what do you remember about X?"* | `memory_recall` |
+
+**Mental model**
+
+```
+New layer I haven't installed yet?  →  load <layer>
+I want my AI to feel different?     →  load archetype (tone shifts in-session)
+Everything else                     →  just say what you want
+```
+
+No phrases to memorize. Talk to your AI like a colleague — *"save this"*, *"check my rules"*, *"log today"*, *"install the testing skill"*. The plugin maps your intent to the right tool.
+
+> Shipped in v3.2.0-alpha.5 — the session-start hook injects the full catalog so Claude knows every mapping without you teaching it.
+
 ### Project context card
 
 Working on 5 different repos this week? aman keeps each project's context fresh automatically. The session-start hook reads `$PROJECT_ROOT/.acore/context.md` (git toplevel, or `$PWD` if you're outside a repo) and injects it into every session — so Claude knows which project you're in without being told.
