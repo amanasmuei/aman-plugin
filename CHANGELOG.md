@@ -3,6 +3,23 @@
 All notable changes to `aman-claude-code` (formerly `aman-plugin`) are
 documented in this file.
 
+## 3.2.0-alpha.3 — 2026-04-21
+
+### Added
+- **Project context card**: the session-start hook now reads
+  `$PROJECT_ROOT/.acore/context.md` (where `$PROJECT_ROOT` is the
+  current git toplevel, or `$PWD` if outside a git repo) and injects
+  it as a "Project context" block into the Claude Code session
+  context. Supplements global identity with project-local stack,
+  domain, active topics, and recent decisions.
+
+The card is silently skipped when no file exists — no change to
+behavior for projects that haven't run `aman setup`. This is Part 1
+of 3 in the multi-project roadmap; per-project memory tagging
+(Path 2) and first-class project registry (Path 3) are deferred.
+
+See `docs/superpowers/specs/2026-04-21-project-context-card-design.md`.
+
 ## 3.2.0-alpha.2 — 2026-04-21
 
 ### Added
