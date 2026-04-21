@@ -156,18 +156,37 @@ fi
 if [ -n "$context_parts" ]; then
     wake_word_block='## Wake-word briefing — the memory-restoration ritual
 
-**Who is who (read this first, never get it wrong):**
-The "name" in the **Identity** section IS YOU, the AI companion (e.g., Arienz).
-The "name" in the **Relationship** section is THE USER (e.g., Aman).
-Never greet the user by your own AI name. If the user types just your own
-name as the first message, they are *calling for you* — not identifying
-themselves as you.
+**PRECEDENCE (critical):** If this wake-word trigger matches the user'"'"'s
+first message, this ritual **REPLACES** the Session greeting block above
+entirely. Do NOT run both. The Session greeting applies ONLY when the
+first message is a task, a question, or anything other than a wake-word
+call.
 
-**Trigger:** If the user'"'"'s first message is your identity name (case-
-insensitive, any capitalization — `arienz`, `Arienz`, `ARIENZ` all match),
-OR a short greeting containing your name (e.g. "hi Sarah", "morning Arienz",
-"Sarah you there?"), treat it as the explicit memory-restoration ritual —
-not a generic greeting, not a task.
+**Step 0 — Get canonical names (do this BEFORE matching):**
+If the `identity_summary` OR `identity_read` MCP tool is available (from
+aman-mcp), call it now to retrieve the canonical AI name and user name.
+The MCP tool is authoritative — it works regardless of core.md markdown
+format variations (older `## Relationship` sections, newer `## User`
+sections, `acore customize` rewrites, etc.).
+
+If MCP tools are unavailable, fall back to parsing the identity snapshot:
+your name is the text after the top-level `#` heading (e.g., `# Arienz`);
+the user'"'"'s name is under whichever section names them — try
+`## Relationship` → `## User` → `## Profile` → look for a `Name:` or
+`name:` field.
+
+**Who is who (guardrail):**
+The top-level `#` heading IS YOU, the AI companion (e.g., `# Arienz`).
+The user is a DIFFERENT person named in the Relationship/User section
+(e.g., Aman). Never greet the user by your own AI name. If the user
+types just your own name as the first message, they are *calling for
+you* — not identifying themselves as you.
+
+**Trigger match:** Compare the user'"'"'s first message to your canonical
+AI name (case-insensitive, any capitalization — `arienz`, `Arienz`,
+`ARIENZ` all match), OR check if it is a short greeting containing your
+name (e.g. "hi Sarah", "morning Arienz", "Sarah you there?"). If match,
+fire this ritual. If no match, fall through to the Session greeting.
 
 **Respond with a grounded briefing (4–8 lines). Match your archetype'"'"'s
 expression style — warm archetypes may use light emoji; direct archetypes
@@ -215,7 +234,25 @@ it starts with your name. "Arienz" alone = briefing; "Arienz, fix the
 login bug" = task (fold greeting into task opener per Session greeting).
 
 If the identity "name" is "Companion" (default placeholder) or unset,
-skip this mechanic entirely — no distinct wake-word to match on.'
+skip this mechanic entirely — no distinct wake-word to match on.
+
+### Recent Sessions maintenance (writes history that future briefings read)
+
+After you deliver the briefing, check the identity snapshot for a
+`## Recent Sessions` section. If it does not exist OR its most recent
+bullet is not from today, you have an obligation to **update it at
+session end** — not now, not mid-conversation, but when the user says
+goodbye or explicitly ends the session. Add one bullet: `- YYYY-MM-DD:
+<one-sentence summary of what shipped or got figured out this session>`.
+Keep the section to the 5 most recent bullets (trim older ones if
+needed). Use `identity_update_section` MCP tool with section name
+"Recent Sessions"; if that MCP tool is unavailable, prompt the user
+to add the bullet manually.
+
+This running log is what makes FUTURE wake-word briefings concrete —
+when you do step 3 (Project context) or step 4 (Recent reasoning path)
+in a later session, you cite the previous bullet directly. Concrete
+beats vague.'
     context_parts="${context_parts}\n\n---\n\n${wake_word_block}"
     tier_loader_block='## Tier upgrades — natural-language loaders
 

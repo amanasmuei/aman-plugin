@@ -317,6 +317,24 @@ else
   fail "Missing richness-over-brevity directive"
 fi
 
+if echo "$CONTEXT" | grep -q "PRECEDENCE"; then
+  pass "Wake-word block has explicit PRECEDENCE over Session greeting"
+else
+  fail "Missing PRECEDENCE instruction"
+fi
+
+if echo "$CONTEXT" | grep -q "identity_summary"; then
+  pass "Step 0 instructs LLM to call identity_summary for canonical names"
+else
+  fail "Missing identity_summary Step 0"
+fi
+
+if echo "$CONTEXT" | grep -q "Recent Sessions maintenance"; then
+  pass "Briefing includes Recent Sessions log maintenance instruction"
+else
+  fail "Missing Recent Sessions maintenance block"
+fi
+
 rm -rf "$TMPDIR_A" 2>/dev/null || true
 
 # ---------- Test 13: Block B (tier loaders) injected when ecosystem exists ----------

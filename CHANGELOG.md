@@ -3,6 +3,36 @@
 All notable changes to `aman-claude-code` (formerly `aman-plugin`) are
 documented in this file.
 
+## 3.2.0-alpha.8 — 2026-04-21
+
+### Fixed
+- **Wake-word briefing now explicitly PRE-EMPTS the Session greeting.**
+  v3.2.0-alpha.7 defined both instructions in parallel; Claude executed
+  the Session greeting first and ignored the briefing. The new precedence
+  rule is the first line of the wake-word block: *"If this wake-word
+  trigger matches, this ritual REPLACES the Session greeting entirely.
+  Do NOT run both."* Closes the trigger-miss bug where greetings would
+  look generic even though the briefing was designed to be rich.
+- **Step 0: call `identity_summary` or `identity_read` MCP for canonical
+  names** before attempting the trigger match. Robust to any core.md
+  markdown variation (older `## Relationship`, newer `## User`,
+  post-`acore customize` rewrites). Fallback parsing rules documented
+  for MCP-unavailable cases.
+
+### Added
+- **Recent Sessions maintenance** (ai-amancore-inspired). Every
+  wake-word briefing instructs the LLM to append a one-bullet session
+  log to a `## Recent Sessions` section in `core.md` at session end
+  (via `identity_update_section` MCP tool). The running log keeps the
+  5 most recent bullets. Future briefings cite this log directly,
+  making step 3 (Project context) and step 4 (Recent reasoning path)
+  concrete rather than vague.
+
+### Tests
++3 assertions (45 total, was 42) verifying PRECEDENCE block,
+`identity_summary` Step 0, and Recent Sessions maintenance instruction
+are present in hook output.
+
 ## 3.2.0-alpha.7 — 2026-04-21
 
 ### Changed
