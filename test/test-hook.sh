@@ -414,6 +414,26 @@ fi
 
 rm -rf "$TMPDIR_PC" 2>/dev/null || true
 
+# ---------- Test 16: Project context card absent when no .acore/context.md ----------
+echo ""
+echo "Test 16: Project context card absent when no file"
+TMPDIR_NC=$(mktemp -d)
+mkdir -p "$TMPDIR_NC/.acore/dev/plugin"
+echo "name: Sarah" > "$TMPDIR_NC/.acore/dev/plugin/core.md"
+EMPTY_PROJECT="$TMPDIR_NC/empty"
+mkdir -p "$EMPTY_PROJECT"
+
+OUTPUT=$(cd "$EMPTY_PROJECT" && HOME="$TMPDIR_NC" bash "$HOOK_PATH" 2>&1)
+CONTEXT=$(echo "$OUTPUT" | jq -r '.additional_context')
+
+if echo "$CONTEXT" | grep -q "Project context (current working directory)"; then
+  fail "Project card block appeared when no file exists"
+else
+  pass "Project card block correctly absent when no file exists"
+fi
+
+rm -rf "$TMPDIR_NC" 2>/dev/null || true
+
 # ---------- Summary ----------
 echo ""
 echo "================================"
