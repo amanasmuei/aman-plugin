@@ -3,6 +3,28 @@
 All notable changes to `aman-claude-code` (formerly `aman-plugin`) are
 documented in this file.
 
+## 3.2.0-alpha.4 — 2026-04-21
+
+### Added
+- **In-session archetype switch**: saying `load archetype` (or close variants
+  like "switch to mentor", "be more supportive", "less sparring") no longer
+  shells out to the interactive `npx @aman_asmuei/acore customize` CLI. The
+  LLM handles the change itself — asks which archetype you want, edits
+  `~/.acore/dev/plugin/core.md` directly with canonical Personality /
+  Communication / Values triples, and **shifts its own tone mid-session**.
+  Change persists for future sessions via the file edit. No more exit +
+  restart to try a new personality.
+
+Canonical archetypes baked into the hook instruction:
+Mentor · Collaborator · Pragmatist · Sparring Partner · Architect · Custom.
+
+Only `load archetype` is special-cased — all other `load ...` phrases still
+shell out via the existing tier-loader table.
+
+### Tests
++2 assertions verifying the Archetype switch protocol and its SHIFT YOUR OWN
+TONE instruction are present in hook output (35 total, was 33).
+
 ## 3.2.0-alpha.3 — 2026-04-21
 
 ### Added

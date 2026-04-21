@@ -342,6 +342,18 @@ else
   fail "Missing 'load archetype' phrase"
 fi
 
+if echo "$CONTEXT" | grep -q "Archetype switch protocol"; then
+  pass "Contains in-session Archetype switch protocol"
+else
+  fail "Missing Archetype switch protocol override"
+fi
+
+if echo "$CONTEXT" | grep -q "SHIFT YOUR OWN TONE"; then
+  pass "Archetype protocol instructs the LLM to shift tone mid-session"
+else
+  fail "Missing tone-shift instruction in archetype protocol"
+fi
+
 rm -rf "$TMPDIR_B" 2>/dev/null || true
 
 # ---------- Test 14: Blocks NOT injected when ecosystem is empty ----------
