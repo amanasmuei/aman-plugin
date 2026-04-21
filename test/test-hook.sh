@@ -44,22 +44,22 @@ else
   fail "Output is not valid JSON" "$OUTPUT"
 fi
 
-# Has additional_context key?
-if echo "$OUTPUT" | jq -e '.additional_context' &>/dev/null; then
-  pass "Contains additional_context key"
+# Has hookSpecificOutput.additionalContext key? (canonical per Claude Code docs)
+if echo "$OUTPUT" | jq -e '.hookSpecificOutput.additionalContext' &>/dev/null; then
+  pass "Contains hookSpecificOutput.additionalContext key"
 else
-  fail "Missing additional_context key"
+  fail "Missing hookSpecificOutput.additionalContext key"
 fi
 
-# Has hookSpecificOutput key?
-if echo "$OUTPUT" | jq -e '.hookSpecificOutput' &>/dev/null; then
-  pass "Contains hookSpecificOutput key"
+# Hook must NOT emit the undocumented top-level additional_context field
+if echo "$OUTPUT" | jq -e '.additional_context' &>/dev/null; then
+  fail "Regression: legacy top-level additional_context field reappeared"
 else
-  fail "Missing hookSpecificOutput key"
+  pass "No legacy top-level additional_context field (expected absent per docs)"
 fi
 
 # Contains "No aman ecosystem configured" message?
-CONTEXT=$(echo "$OUTPUT" | jq -r '.additional_context')
+CONTEXT=$(echo "$OUTPUT" | jq -r '.hookSpecificOutput.additionalContext')
 if echo "$CONTEXT" | grep -q "No aman ecosystem configured"; then
   pass "Shows 'No aman ecosystem configured' when no files exist"
 else
@@ -83,7 +83,7 @@ else
   fail "Output is not valid JSON" "$OUTPUT"
 fi
 
-CONTEXT=$(echo "$OUTPUT" | jq -r '.additional_context')
+CONTEXT=$(echo "$OUTPUT" | jq -r '.hookSpecificOutput.additionalContext')
 if echo "$CONTEXT" | grep -q "Identity: TestBot"; then
   pass "Contains core.md content"
 else
@@ -101,7 +101,7 @@ echo "# Tools: hammer, wrench" > "$TMPDIR3/.akit/kit.md"
 
 OUTPUT=$(HOME="$TMPDIR3" bash "$HOOK_PATH" 2>&1)
 
-CONTEXT=$(echo "$OUTPUT" | jq -r '.additional_context')
+CONTEXT=$(echo "$OUTPUT" | jq -r '.hookSpecificOutput.additionalContext')
 if echo "$CONTEXT" | grep -q "Tools: hammer, wrench"; then
   pass "Contains kit.md content"
 else
@@ -119,7 +119,7 @@ echo "# Workflow: deploy pipeline" > "$TMPDIR4/.aflow/flow.md"
 
 OUTPUT=$(HOME="$TMPDIR4" bash "$HOOK_PATH" 2>&1)
 
-CONTEXT=$(echo "$OUTPUT" | jq -r '.additional_context')
+CONTEXT=$(echo "$OUTPUT" | jq -r '.hookSpecificOutput.additionalContext')
 if echo "$CONTEXT" | grep -q "Workflow: deploy pipeline"; then
   pass "Contains flow.md content"
 else
@@ -137,7 +137,7 @@ echo "# Rule: no secrets in code" > "$TMPDIR5/.arules/rules.md"
 
 OUTPUT=$(HOME="$TMPDIR5" bash "$HOOK_PATH" 2>&1)
 
-CONTEXT=$(echo "$OUTPUT" | jq -r '.additional_context')
+CONTEXT=$(echo "$OUTPUT" | jq -r '.hookSpecificOutput.additionalContext')
 if echo "$CONTEXT" | grep -q "Rule: no secrets in code"; then
   pass "Contains rules.md content"
 else
@@ -155,7 +155,7 @@ echo "# Skill: code review" > "$TMPDIR6/.askill/skills.md"
 
 OUTPUT=$(HOME="$TMPDIR6" bash "$HOOK_PATH" 2>&1)
 
-CONTEXT=$(echo "$OUTPUT" | jq -r '.additional_context')
+CONTEXT=$(echo "$OUTPUT" | jq -r '.hookSpecificOutput.additionalContext')
 if echo "$CONTEXT" | grep -q "Skill: code review"; then
   pass "Contains skills.md content"
 else
@@ -183,7 +183,7 @@ else
   fail "Output is not valid JSON with all files" "$OUTPUT"
 fi
 
-CONTEXT=$(echo "$OUTPUT" | jq -r '.additional_context')
+CONTEXT=$(echo "$OUTPUT" | jq -r '.hookSpecificOutput.additionalContext')
 ALL_FOUND=true
 for keyword in "Identity: AllBot" "Kit: all tools" "Flow: all workflows" "Rules: all rules" "Skills: all skills"; do
   if ! echo "$CONTEXT" | grep -q "$keyword"; then
@@ -236,7 +236,7 @@ mkdir -p "$TMPDIR9/.amem"
 
 OUTPUT=$(HOME="$TMPDIR9" bash "$HOOK_PATH" 2>&1)
 
-CONTEXT=$(echo "$OUTPUT" | jq -r '.additional_context')
+CONTEXT=$(echo "$OUTPUT" | jq -r '.hookSpecificOutput.additionalContext')
 if echo "$CONTEXT" | grep -q "amem — Persistent Memory"; then
   pass "amem guidance injected when ~/.amem exists"
 else
@@ -259,7 +259,7 @@ echo "# Identity" > "$TMPDIR10/.acore/core.md"
 
 OUTPUT=$(HOME="$TMPDIR10" bash "$HOOK_PATH" 2>&1)
 
-CONTEXT=$(echo "$OUTPUT" | jq -r '.additional_context')
+CONTEXT=$(echo "$OUTPUT" | jq -r '.hookSpecificOutput.additionalContext')
 if echo "$CONTEXT" | grep -q "amem — Persistent Memory"; then
   fail "amem guidance should not be injected without ~/.amem"
 else
@@ -291,7 +291,7 @@ echo "# Identity
 name: Sarah" > "$TMPDIR_A/.acore/dev/plugin/core.md"
 
 OUTPUT=$(HOME="$TMPDIR_A" bash "$HOOK_PATH" 2>&1)
-CONTEXT=$(echo "$OUTPUT" | jq -r '.additional_context')
+CONTEXT=$(echo "$OUTPUT" | jq -r '.hookSpecificOutput.additionalContext')
 
 if echo "$CONTEXT" | grep -q "Wake-word briefing"; then
   pass "Contains 'Wake-word briefing' heading when ecosystem exists"
@@ -371,7 +371,7 @@ echo "# Identity
 name: Sarah" > "$TMPDIR_B/.acore/dev/plugin/core.md"
 
 OUTPUT=$(HOME="$TMPDIR_B" bash "$HOOK_PATH" 2>&1)
-CONTEXT=$(echo "$OUTPUT" | jq -r '.additional_context')
+CONTEXT=$(echo "$OUTPUT" | jq -r '.hookSpecificOutput.additionalContext')
 
 if echo "$CONTEXT" | grep -q "Tier upgrades — natural-language loaders"; then
   pass "Contains 'Tier upgrades' heading"
@@ -448,7 +448,7 @@ TMPDIR_C=$(mktemp -d)
 # Empty HOME — no .acore, no .arules, no .aflow, nothing.
 
 OUTPUT=$(HOME="$TMPDIR_C" bash "$HOOK_PATH" 2>&1)
-CONTEXT=$(echo "$OUTPUT" | jq -r '.additional_context')
+CONTEXT=$(echo "$OUTPUT" | jq -r '.hookSpecificOutput.additionalContext')
 
 if echo "$CONTEXT" | grep -q "Wake-word briefing"; then
   fail "Block A leaked into no-ecosystem fallback"
@@ -489,7 +489,7 @@ cat > "$PROJECT_DIR/.acore/context.md" <<'PCEOF'
 PCEOF
 
 OUTPUT=$(cd "$PROJECT_DIR" && HOME="$TMPDIR_PC" bash "$HOOK_PATH" 2>&1)
-CONTEXT=$(echo "$OUTPUT" | jq -r '.additional_context')
+CONTEXT=$(echo "$OUTPUT" | jq -r '.hookSpecificOutput.additionalContext')
 
 if echo "$CONTEXT" | grep -q "Project context (current working directory)"; then
   pass "Contains 'Project context' heading when card exists"
@@ -521,7 +521,7 @@ EMPTY_PROJECT="$TMPDIR_NC/empty"
 mkdir -p "$EMPTY_PROJECT"
 
 OUTPUT=$(cd "$EMPTY_PROJECT" && HOME="$TMPDIR_NC" bash "$HOOK_PATH" 2>&1)
-CONTEXT=$(echo "$OUTPUT" | jq -r '.additional_context')
+CONTEXT=$(echo "$OUTPUT" | jq -r '.hookSpecificOutput.additionalContext')
 
 if echo "$CONTEXT" | grep -q "Project context (current working directory)"; then
   fail "Project card block appeared when no file exists"
