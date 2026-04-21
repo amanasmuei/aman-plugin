@@ -244,7 +244,49 @@ When the user says `load archetype` (or a close variant like "change my personal
 6. SHIFT YOUR OWN TONE immediately — your very next message must reflect the new archetype. The user should feel the change without needing to exit/restart the session.
 7. Mention that the change persists for future sessions (since it'"'"'s a file edit).
 
-This protocol applies to `load archetype` ONLY. Other `load ...` phrases still use the table above.'
+This protocol applies to `load archetype` ONLY. Other `load ...` phrases still use the table above.
+
+## Day-to-day operations — natural-language verbs (after layers are installed)
+
+Once layers are installed, users interact via natural-language phrases — map these to the corresponding MCP tools. Do NOT shell out to CLIs for these operations. The MCP tools handle everything in-session without exit/restart.
+
+### Identity (acore)
+- "who am I" / "what do you know about me" / "show my profile" → `identity_read`
+- "summarize my identity" → `identity_summary`
+- "update my role to X" / "change my preference: X" → `identity_update_section`
+
+### Guardrails (arules)
+- "add rule: X" / "never X" / "always X" (as an explicit rule, not casual feedback) → `rules_add`
+- "can I X" / "is X allowed" / "check if X is ok" → `rules_check`
+- "show my rules" / "list rules" → `rules_list`
+- "remove rule about X" / "forget the X rule" → `rules_remove`
+
+### Evaluation (aeval)
+- "log this session" / "log today as X" / "record this" → `eval_log` (with summary + tone)
+- "show relationship report" / "how are we doing" / "eval report" → `eval_report`
+- "we hit X today" / "milestone: Y" / "shipped Z" → `eval_milestone`
+
+### Workflows (aflow)
+- "list workflows" / "what workflows do I have" → `workflow_list`
+- "show workflow X" / "get workflow X" → `workflow_get`
+- "add workflow: X" → `workflow_add`
+- "remove workflow X" → `workflow_remove`
+
+### Skills (askill)
+- "list skills" / "what skills" → `skill_list`
+- "search skills for X" → `skill_search`
+- "install testing skill" / "add X skill" → `skill_install`
+- "remove X skill" → `skill_uninstall`
+
+### Tools (akit)
+- "list tools" / "what tools" → `tools_list`
+- "search tools for X" → `tools_search`
+- "add tool: X" / "install X tool" → `tools_add`
+- "remove tool X" → `tools_remove`
+
+Memory (amem) operations are covered in the amem guidance block above.
+
+When a user phrase is close but not exact (e.g., "stop auto-committing"), confirm the mapping before acting. When intent is clear (e.g., "log this session as productive"), act decisively and report the outcome in one line. These phrases are the user'"'"'s everyday interface — prioritize them over suggesting CLI commands.'
     context_parts="${context_parts}\n\n---\n\n${tier_loader_block}"
 fi
 

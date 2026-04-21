@@ -3,6 +3,30 @@
 All notable changes to `aman-claude-code` (formerly `aman-plugin`) are
 documented in this file.
 
+## 3.2.0-alpha.5 — 2026-04-21
+
+### Added
+- **Day-to-day operations verb catalog**: a new section in the injected
+  system context maps natural-language phrases to the MCP tools on the
+  `aman` server, across all six layers:
+
+  | Layer | Sample phrases → MCP tool |
+  |---|---|
+  | **acore** | "who am I" → `identity_read`, "update my role" → `identity_update_section` |
+  | **arules** | "add rule: never force-push" → `rules_add`, "can I deploy" → `rules_check`, "list rules" → `rules_list` |
+  | **aeval** | "log this session" → `eval_log`, "how are we doing" → `eval_report` |
+  | **aflow** | "list workflows" → `workflow_list`, "add workflow" → `workflow_add` |
+  | **askill** | "list skills" → `skill_list`, "install testing skill" → `skill_install` |
+  | **akit** | "list tools" → `tools_list`, "add tool: github" → `tools_add` |
+
+  Extends the "load archetype" pattern from 3.2.0-alpha.4 to every layer —
+  no shell-out to interactive CLIs for day-to-day operations. Layers can be
+  added, listed, queried, removed, or updated mid-session via plain language.
+
+### Tests
++2 assertions (37 total, was 35) verifying the Day-to-day catalog is present
+with the `rules_add` / `eval_log` / `skill_install` tool references.
+
 ## 3.2.0-alpha.4 — 2026-04-21
 
 ### Added

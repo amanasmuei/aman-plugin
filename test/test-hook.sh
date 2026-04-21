@@ -354,6 +354,18 @@ else
   fail "Missing tone-shift instruction in archetype protocol"
 fi
 
+if echo "$CONTEXT" | grep -q "Day-to-day operations"; then
+  pass "Contains Day-to-day operations verb catalog"
+else
+  fail "Missing Day-to-day operations catalog"
+fi
+
+if echo "$CONTEXT" | grep -qE "rules_add.*eval_log.*skill_install|rules_add" && echo "$CONTEXT" | grep -q "eval_log" && echo "$CONTEXT" | grep -q "skill_install"; then
+  pass "Day-to-day catalog references rules_add / eval_log / skill_install MCP tools"
+else
+  fail "Day-to-day catalog missing one of the key MCP tool names"
+fi
+
 rm -rf "$TMPDIR_B" 2>/dev/null || true
 
 # ---------- Test 14: Blocks NOT injected when ecosystem is empty ----------
