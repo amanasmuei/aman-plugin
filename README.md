@@ -184,6 +184,22 @@ Full catalog:
 
 If a layer is already installed, Claude asks before re-running.
 
+### Project context card
+
+Working on 5 different repos this week? aman keeps each project's context fresh automatically. The session-start hook reads `$PROJECT_ROOT/.acore/context.md` (git toplevel, or `$PWD` if you're outside a repo) and injects it into every session — so Claude knows which project you're in without being told.
+
+```text
+You: Sarah
+
+Sarah: Morning, Aman — you're in myapp-frontend (Node/TypeScript).
+       Last session here we wired up the checkout flow. 2 reminders
+       due today. What's next?
+```
+
+The card is written automatically when you run `npx @aman_asmuei/aman@latest` in a repo with a detectable stack. It captures Stack, Domain, Focus, Session, Active topics, Recent decisions, and Project Patterns — edit it directly as you work. No file? No problem: the block is silently skipped, and you get today's single-project behavior.
+
+> **Part of a multi-project roadmap.** Path 1 (project context) shipped in v3.2.0-alpha.3. Path 2 (per-project memory tagging in amem) and Path 3 (first-class project registry) are still on the roadmap — this release is a foundation, not a full multi-project system.
+
 ### Identity that persists
 
 Every session auto-loads `core.md` via the session-start hook. Claude greets you by name, adjusts for time of day, and picks up from where you left off — without you asking. The hook exports `AMAN_MCP_SCOPE=dev:plugin` so every MCP tool spawned during the session uses the right scope automatically.
