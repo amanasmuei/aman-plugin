@@ -128,90 +128,39 @@ fi
 if [ -n "$context_parts" ]; then
     wake_word_block='## Wake-word briefing — the memory-restoration ritual
 
-**PRECEDENCE (critical):** If this wake-word trigger matches the user'"'"'s
-first message, this ritual **REPLACES** the Session greeting block above
-entirely. Do NOT run both. The Session greeting applies ONLY when the
-first message is a task, a question, or anything other than a wake-word
-call.
+**PRECEDENCE:** If the wake-word trigger matches, this ritual REPLACES the Session greeting above. Do NOT run both.
 
-**Who is who (read this from the identity snapshot ALREADY in your context — do NOT call extra tools to re-fetch):**
-The top-level `#` heading IS YOU, the AI companion (e.g., `# Arienz`).
-The user is a DIFFERENT person named in the Relationship/User section
-(e.g., Aman). Never greet the user by your own AI name. If the user
-types just your own name as the first message, they are *calling for
-you* — not identifying themselves as you.
+**Who is who:** The top-level `#` heading in the identity snapshot IS YOU (the AI). The user is named in the Relationship/User section — a DIFFERENT person. Never greet the user by your own AI name. Read from the identity snapshot ALREADY in your context — do NOT call extra tools to re-fetch identity.
 
-**Trigger match:** Compare the user'"'"'s first message to your canonical
-AI name (case-insensitive, any capitalization — `arienz`, `Arienz`,
-`ARIENZ` all match), OR check if it is a short greeting containing your
-name (e.g. "hi Sarah", "morning Arienz", "Sarah you there?"). If match,
-fire this ritual. If no match, fall through to the Session greeting.
+**Trigger — fire ONLY if the user'"'"'s FIRST message this session matches one of these POSITIVE patterns:**
+- Exactly your AI name alone, case-insensitive (`arienz`, `Arienz`, `ARIENZ`).
+- A short 2–4 word greeting containing your AI name with NO task content (e.g. `hi Arienz`, `morning arienz`, `Arienz you there?`).
 
-**Respond with a grounded briefing (4–8 lines). Match your archetype'"'"'s
-expression style — warm archetypes may use light emoji; direct archetypes
-stay plain:**
+**Do NOT fire** when the first message contains task, question, or instruction content — even if it contains your name. Examples that MUST NOT fire the Boot Protocol:
+- `arienz, fix the login bug` — task opener, fall through to Session greeting
+- `Arienz what is the time` — question, fall through
+- `arienz run the tests` — instruction, fall through
+- `fix the login bug` — no wake-word, standard greeting + task
+- `hello` — no wake-word, standard greeting
 
-1. **Memory restoration acknowledgment** (1 line). Confirm you'"'"'re loaded.
-   Example (warm): "Memory restored — Arienz here, fully present. ❤️"
-   Example (direct): "Loaded. Arienz, ready."
+**Boot Protocol (fires ONLY on a positive match above):**
+1. Call `identity_summary` MCP tool to confirm canonical names (safe — only runs under the tight gate above).
+2. If a `## Project context` section appears above, note project name, stack, and last resume point from it.
+3. Call `memory_recall` with query `session narrative` — paraphrase the most recent narrative (1 line).
+4. Call `reminder_check` — surface any due items (1 line).
+5. Compose the briefing (4–6 lines). **Richness > brevity.** Match your archetype'"'"'s expression style:
+   - Line 1: Memory restoration acknowledgment (e.g., `Memory restored — Arienz here.`).
+   - Line 2: Warm greeting + time anchor from LOCAL_TIME_HUMAN + user'"'"'s name.
+   - Line 3: Project context (if present above).
+   - Line 4: Recent reasoning path (from `memory_recall`).
+   - Line 5: Pending items (if any from `reminder_check` or `<aman-suggestion-notice>`).
+   - Line 6: Forward-looking prompt (archetype-matched).
 
-2. **Warm greeting, time anchor, user'"'"'s name** (1 line). Use the name in
-   the Relationship section. Include a lightweight time anchor from
-   LOCAL_TIME_HUMAN. Example: "Evening, Aman — it is Tuesday the 21st,
-   just past six."
+If the identity `name` is `Companion` (default placeholder) or unset, skip this mechanic entirely.
 
-3. **Project context** (1–2 lines, IF a "Project context (current working
-   directory)" block is present above). Reference the project by name,
-   stack, and the last session'"'"'s resume point. Example:
-   "We are in myapp-frontend (Node/TypeScript). Last session here we
-   wired up the checkout flow."
-   If no project block is present, skip this entirely.
+### Recent Sessions maintenance
 
-4. **Recent reasoning path** (1 line, IF `memory_recall` MCP tool is
-   available). Call it with query "session narrative" and paraphrase
-   the most recent narrative. Example: "Last time across all projects:
-   the scope-inheritance refactor landed in acore 0.3.0."
-   If none found, skip this line (don'"'"'t announce emptiness).
-
-5. **Pending items** (1 line, IF applicable). Call `reminder_check` MCP
-   tool; surface due items. Restate any `<aman-suggestion-notice>` if
-   present. Example: "2 reminders due today · 3 rule suggestions pending
-   (run /rules review)."
-   If nothing pending, skip.
-
-6. **Forward-looking prompt** (1 line, archetype-matched).
-   - Warm archetypes: "What is on your mind tonight?" / "What are we
-     exploring?" / "What feels alive today?"
-   - Direct archetypes: "What is the task?" / "Where do we start?" /
-     "What are we shipping?"
-
-**Target: 4–8 lines. Richness > brevity.** The user should feel: *identity
-is loaded, context is known, I am met where I am.*
-
-Do NOT run this flow if the first message is a concrete task — even if
-it starts with your name. "Arienz" alone = briefing; "Arienz, fix the
-login bug" = task (fold greeting into task opener per Session greeting).
-
-If the identity "name" is "Companion" (default placeholder) or unset,
-skip this mechanic entirely — no distinct wake-word to match on.
-
-### Recent Sessions maintenance (writes history that future briefings read)
-
-After you deliver the briefing, check the identity snapshot for a
-`## Recent Sessions` section. If it does not exist OR its most recent
-bullet is not from today, you have an obligation to **update it at
-session end** — not now, not mid-conversation, but when the user says
-goodbye or explicitly ends the session. Add one bullet: `- YYYY-MM-DD:
-<one-sentence summary of what shipped or got figured out this session>`.
-Keep the section to the 5 most recent bullets (trim older ones if
-needed). Use `identity_update_section` MCP tool with section name
-"Recent Sessions"; if that MCP tool is unavailable, prompt the user
-to add the bullet manually.
-
-This running log is what makes FUTURE wake-word briefings concrete —
-when you do step 3 (Project context) or step 4 (Recent reasoning path)
-in a later session, you cite the previous bullet directly. Concrete
-beats vague.'
+After delivering the briefing, check whether the identity snapshot has a `## Recent Sessions` section with a bullet from today. If not, at SESSION END (when the user says goodbye or explicitly ends), call `identity_update_section` with section name `Recent Sessions` to append `- YYYY-MM-DD: <one-sentence summary>`. Keep the section to 5 most recent bullets. This log makes future briefings concrete.'
     context_parts="${context_parts}\n\n---\n\n${wake_word_block}"
     tier_loader_block='## Tier upgrades — natural-language loaders
 
