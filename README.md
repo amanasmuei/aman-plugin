@@ -158,6 +158,8 @@ Sarah: Morning, Aman — today's the 21st. Last session we wired up
 
 Triggered only when your first message is just the AI's name (or a greeting with the name, like `hi Sarah`). If the first message is already a task (`Sarah, fix the login bug`), the plugin folds the greeting into the task opener — no noise added. Skipped if the name is still set to `Companion`.
 
+> **Reliability (v3.2.0-alpha.10+).** The trigger is gated by explicit positive *and* negative examples in the session-start manifest, not prose alone. Pure wake-word inputs fire the full Boot Protocol; wake-word + task content suppresses it. Empirically validated across 6 scenarios. alpha.11 additionally drops an undocumented duplicate field from the hook's JSON emit (no behavior change, ~55% smaller hook I/O).
+
 ### Tier-loader phrases
 
 Don't remember which `npx` command adds which layer? Just ask in plain language:
