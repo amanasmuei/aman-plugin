@@ -373,6 +373,47 @@ fi
 
 rm -rf "$TMPDIR_C" 2>/dev/null || true
 
+# ---------- Test 15: Project context card loaded when .acore/context.md exists ----------
+echo ""
+echo "Test 15: Project context card present when file exists"
+TMPDIR_PC=$(mktemp -d)
+mkdir -p "$TMPDIR_PC/.acore/dev/plugin"
+echo "name: Sarah" > "$TMPDIR_PC/.acore/dev/plugin/core.md"
+PROJECT_DIR="$TMPDIR_PC/myproject"
+mkdir -p "$PROJECT_DIR/.acore"
+cat > "$PROJECT_DIR/.acore/context.md" <<'PCEOF'
+## Work
+- Stack: Node/TypeScript
+- Domain: frontend
+
+## Session
+- Last updated: 2026-04-21
+- Resume: wiring checkout flow
+PCEOF
+
+OUTPUT=$(cd "$PROJECT_DIR" && HOME="$TMPDIR_PC" bash "$HOOK_PATH" 2>&1)
+CONTEXT=$(echo "$OUTPUT" | jq -r '.additional_context')
+
+if echo "$CONTEXT" | grep -q "Project context (current working directory)"; then
+  pass "Contains 'Project context' heading when card exists"
+else
+  fail "Missing 'Project context' heading"
+fi
+
+if echo "$CONTEXT" | grep -q "Stack: Node/TypeScript"; then
+  pass "Contains project card body (Stack line)"
+else
+  fail "Missing project card body"
+fi
+
+if echo "$CONTEXT" | grep -q "wiring checkout flow"; then
+  pass "Contains project-specific session text"
+else
+  fail "Missing project-specific session text"
+fi
+
+rm -rf "$TMPDIR_PC" 2>/dev/null || true
+
 # ---------- Summary ----------
 echo ""
 echo "================================"

@@ -218,6 +218,31 @@ them as first-class intents, same weight as slash commands.'
     context_parts="${context_parts}\n\n---\n\n${tier_loader_block}"
 fi
 
+# Project context card — load $PROJECT_ROOT/.acore/context.md if present.
+# Project root = git toplevel if in a git repo, else $PWD.
+project_root=""
+if command -v git >/dev/null 2>&1; then
+    project_root=$(git rev-parse --show-toplevel 2>/dev/null || true)
+fi
+if [ -z "$project_root" ]; then
+    project_root="$PWD"
+fi
+project_context_path="${project_root}/.acore/context.md"
+if [ -f "$project_context_path" ] && [ -n "$context_parts" ]; then
+    project_context=$(cat "$project_context_path")
+    project_context_block=$(cat <<PCEND
+## Project context (current working directory)
+
+The following is the project-specific context card for the current project root (\`${project_root}\`). This supplements your global identity above with project-local stack, domain, active topics, and recent decisions. Prefer project-local facts over generic assumptions when they conflict.
+
+---
+
+${project_context}
+PCEND
+)
+    context_parts="${context_parts}\n\n---\n\n${project_context_block}"
+fi
+
 # Build the context message
 if [ -z "$context_parts" ]; then
     session_context="<aman-ecosystem>\nNo aman ecosystem configured. Run: npx @aman_asmuei/aman\n</aman-ecosystem>"
