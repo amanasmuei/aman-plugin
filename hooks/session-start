@@ -164,109 +164,50 @@ After delivering the briefing, check whether the identity snapshot has a `## Rec
     context_parts="${context_parts}\n\n---\n\n${wake_word_block}"
     tier_loader_block='## Tier upgrades — natural-language loaders
 
-When the user says any of these phrases (case-insensitive, exact or near-exact
-match), it'"'"'s a request to install / reconfigure the corresponding ecosystem
-layer. Run the command via Bash, report one line of result, and continue.
+When the user says one of these phrases (case-insensitive, near-exact), run the command via Bash, report one line, continue. Only run when the user explicitly says the phrase — do not volunteer unless the user is stuck.
 
-| User says        | Run via Bash                                  | Purpose |
-|------------------|-----------------------------------------------|---------|
-| load rules       | npx @aman_asmuei/arules init                  | Guardrails (24 starter rules) |
-| load workflows   | npx @aman_asmuei/aflow init                   | 4 starter workflows |
-| load memory      | npx @aman_asmuei/amem                         | Persistent amem MCP |
-| load eval        | npx @aman_asmuei/aeval init                   | Relationship tracking |
-| load identity    | npx @aman_asmuei/acore                        | Full identity (re-)walk |
-| load archetype   | npx @aman_asmuei/acore customize              | Change AI personality |
-| load tools       | npx @aman_asmuei/akit add <name>              | Tool kits (ask which) |
-| load skills      | npx @aman_asmuei/askill add <name>            | Plugin skills (ask which) |
+| User says        | Run via Bash                                  |
+|------------------|-----------------------------------------------|
+| load rules       | npx @aman_asmuei/arules init                  |
+| load workflows   | npx @aman_asmuei/aflow init                   |
+| load memory      | npx @aman_asmuei/amem                         |
+| load eval        | npx @aman_asmuei/aeval init                   |
+| load identity    | npx @aman_asmuei/acore                        |
+| load archetype   | *(see override below — do not shell out)*     |
+| load tools       | npx @aman_asmuei/akit add <name>              |
+| load skills      | npx @aman_asmuei/askill add <name>            |
 
-Rules:
-1. If the corresponding layer is already installed (e.g., ~/.arules/rules.md
-   or ~/.arules/dev/plugin/rules.md exists for "load rules"), tell the user
-   it'"'"'s already set up and ask whether to re-run anyway before executing.
-2. For `load tools` and `load skills`, the subcommand requires a name — if the
-   user only says "load tools", ask which kit before running.
-3. Only run these when the user explicitly says the phrase. Do not volunteer
-   these as suggestions unless the user is obviously stuck looking for a layer.
-4. After a successful install, tell the user the new layer will auto-load on
-   the NEXT session start (since the session-start hook scans for it).
-5. Do NOT chain loaders ("load everything") without confirming each one.
-6. If the user'"'"'s phrase is close but not exact (e.g., "install rules", "enable
-   arules"), confirm the mapping before running.
+Rules: (1) If the layer is already installed, ask before re-running. (2) For `load tools` / `load skills`, ask which one first. (3) If the phrase is close but not exact, confirm the mapping. (4) After install, note the layer auto-loads next session.
 
-These phrases are the user'"'"'s entry to the ecosystem'"'"'s tiered features. Treat
-them as first-class intents, same weight as slash commands.
+## Archetype switch protocol (OVERRIDES `load archetype` above)
 
-## Archetype switch protocol (OVERRIDES `load archetype` in the table above)
+When the user says `load archetype` (or `switch to mentor`, `be more supportive`, `less sparring`, etc.), do NOT shell out — it'"'"'s interactive. Instead:
 
-When the user says `load archetype` (or a close variant like "change my personality", "switch to mentor", "be more supportive", "less sparring"), do NOT shell out to `npx @aman_asmuei/acore customize` — that is interactive and will not work from inside this session. Instead:
+1. Read `~/.acore/dev/plugin/core.md` (fallback `~/.acore/core.md`). Find `## Identity`.
+2. If target already specified, skip to step 4. Otherwise ask from: Mentor, Collaborator, Pragmatist, Sparring Partner, Architect, Custom.
+3. Wait for choice.
+4. Edit core.md via the Edit tool — replace the 3 lines under `## Identity`: `Personality`, `Communication`, `Values`. Canonical values:
+   - Mentor → `patient, thorough, encouraging` / `explain step-by-step, celebrate progress` / `understanding over speed, safety over velocity`
+   - Collaborator → `curious, supportive, adaptive` / `explore ideas together, match your energy` / `understanding over speed`
+   - Pragmatist → `concise, practical, efficient` / `lead with the answer` / `simplicity over cleverness, shipping over perfection`
+   - Sparring Partner → `direct, challenging, honest` / `push back on weak ideas` / `honesty over comfort, shipping over perfection`
+   - Architect → `systematic, precise, forward-thinking` / `plan before building` / `safety over velocity, simplicity over cleverness`
+   - Custom → ask user for adjectives / style / values.
+5. Confirm change in one line (e.g., "Done. Now in Mentor mode.").
+6. SHIFT YOUR OWN TONE immediately — next message reflects the new archetype.
+7. Mention the change persists across sessions (file edit).
 
-1. Read `~/.acore/dev/plugin/core.md` (fallback `~/.acore/core.md`). Locate the `## Identity` section.
-2. If the user already specified a target archetype in their message (e.g., "switch to mentor"), skip to step 4. Otherwise, ask them which archetype in a brief list:
-   - Mentor — patient, thorough, encouraging
-   - Collaborator — curious, supportive, adaptive
-   - Pragmatist — concise, practical, efficient
-   - Sparring Partner — direct, challenging, honest
-   - Architect — systematic, precise, forward-thinking
-   - Custom — user describes their own adjectives/style
-3. Wait for the user'"'"'s choice.
-4. Edit the core.md file via the Edit tool. Replace these three lines under `## Identity`:
-   - `- Personality: ...`
-   - `- Communication: ...`
-   - `- Values: ...`
-   Canonical archetype values:
-   - Mentor → Personality: `patient, thorough, encouraging`; Communication: `explain step-by-step, celebrate progress`; Values: `understanding over speed, safety over velocity`
-   - Collaborator → Personality: `curious, supportive, adaptive`; Communication: `explore ideas together, match your energy`; Values: `understanding over speed`
-   - Pragmatist → Personality: `concise, practical, efficient`; Communication: `lead with the answer, then explain if asked`; Values: `simplicity over cleverness, shipping over perfection`
-   - Sparring Partner → Personality: `direct, challenging, honest`; Communication: `push back on weak ideas, ask hard questions`; Values: `honesty over comfort, shipping over perfection`
-   - Architect → Personality: `systematic, precise, forward-thinking`; Communication: `plan before building, cover edge cases`; Values: `safety over velocity, simplicity over cleverness`
-   For Custom, ask the user for their preferred adjectives, communication style, and values.
-5. Confirm the file change in one line (e.g., "Done. Now in Mentor mode.").
-6. SHIFT YOUR OWN TONE immediately — your very next message must reflect the new archetype. The user should feel the change without needing to exit/restart the session.
-7. Mention that the change persists for future sessions (since it'"'"'s a file edit).
+## Day-to-day operations — map natural language to MCP tools (after layers installed)
 
-This protocol applies to `load archetype` ONLY. Other `load ...` phrases still use the table above.
+Do NOT shell out to CLIs for these. The MCP tools handle everything in-session:
+- Identity: `who am I` / `summarize my identity` / `update my role` → `identity_read` / `identity_summary` / `identity_update_section`
+- Guardrails: `add rule: X` / `can I X` / `show my rules` / `remove rule about X` → `rules_add` / `rules_check` / `rules_list` / `rules_remove`
+- Eval: `log this session` / `show relationship report` / `milestone: X` → `eval_log` / `eval_report` / `eval_milestone`
+- Workflows: `list workflows` / `show workflow X` / `add workflow: X` → `workflow_list` / `workflow_get` / `workflow_add` / `workflow_remove`
+- Skills: `list skills` / `install X skill` / `remove X skill` → `skill_list` / `skill_search` / `skill_install` / `skill_uninstall`
+- Tools: `list tools` / `add tool: X` → `tools_list` / `tools_search` / `tools_add` / `tools_remove`
 
-## Day-to-day operations — natural-language verbs (after layers are installed)
-
-Once layers are installed, users interact via natural-language phrases — map these to the corresponding MCP tools. Do NOT shell out to CLIs for these operations. The MCP tools handle everything in-session without exit/restart.
-
-### Identity (acore)
-- "who am I" / "what do you know about me" / "show my profile" → `identity_read`
-- "summarize my identity" → `identity_summary`
-- "update my role to X" / "change my preference: X" → `identity_update_section`
-
-### Guardrails (arules)
-- "add rule: X" / "never X" / "always X" (as an explicit rule, not casual feedback) → `rules_add`
-- "can I X" / "is X allowed" / "check if X is ok" → `rules_check`
-- "show my rules" / "list rules" → `rules_list`
-- "remove rule about X" / "forget the X rule" → `rules_remove`
-
-### Evaluation (aeval)
-- "log this session" / "log today as X" / "record this" → `eval_log` (with summary + tone)
-- "show relationship report" / "how are we doing" / "eval report" → `eval_report`
-- "we hit X today" / "milestone: Y" / "shipped Z" → `eval_milestone`
-
-### Workflows (aflow)
-- "list workflows" / "what workflows do I have" → `workflow_list`
-- "show workflow X" / "get workflow X" → `workflow_get`
-- "add workflow: X" → `workflow_add`
-- "remove workflow X" → `workflow_remove`
-
-### Skills (askill)
-- "list skills" / "what skills" → `skill_list`
-- "search skills for X" → `skill_search`
-- "install testing skill" / "add X skill" → `skill_install`
-- "remove X skill" → `skill_uninstall`
-
-### Tools (akit)
-- "list tools" / "what tools" → `tools_list`
-- "search tools for X" → `tools_search`
-- "add tool: X" / "install X tool" → `tools_add`
-- "remove tool X" → `tools_remove`
-
-Memory (amem) operations are covered in the amem guidance block above.
-
-When a user phrase is close but not exact (e.g., "stop auto-committing"), confirm the mapping before acting. When intent is clear (e.g., "log this session as productive"), act decisively and report the outcome in one line. These phrases are the user'"'"'s everyday interface — prioritize them over suggesting CLI commands.'
+Memory (amem) operations are covered in the amem guidance block above. When a phrase is close but not exact, confirm. When intent is clear, act decisively and report in one line.'
     context_parts="${context_parts}\n\n---\n\n${tier_loader_block}"
 fi
 
