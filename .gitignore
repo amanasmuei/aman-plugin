@@ -27,6 +27,3 @@ npm-debug.log*
 
 # Worktrees
 .worktrees/
-
-# Worktrees
-.worktrees/
