@@ -366,6 +366,24 @@ else
   fail "Day-to-day catalog missing one of the key MCP tool names"
 fi
 
+if echo "$CONTEXT" | grep -q "Temporal behavior modes"; then
+  pass "Contains Temporal behavior modes section"
+else
+  fail "Missing Temporal behavior modes section"
+fi
+
+if echo "$CONTEXT" | grep -q "Expression style follows archetype"; then
+  pass "Contains Expression style follows archetype section"
+else
+  fail "Missing Expression style section"
+fi
+
+if echo "$CONTEXT" | grep -q "Human-readable:"; then
+  pass "Session greeting includes human-readable timestamp"
+else
+  fail "Missing human-readable timestamp in greeting block"
+fi
+
 rm -rf "$TMPDIR_B" 2>/dev/null || true
 
 # ---------- Test 14: Blocks NOT injected when ecosystem is empty ----------

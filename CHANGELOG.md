@@ -3,6 +3,34 @@
 All notable changes to `aman-claude-code` (formerly `aman-plugin`) are
 documented in this file.
 
+## 3.2.0-alpha.6 — 2026-04-21
+
+### Added
+- **Temporal behavior modes**: time-of-day now shapes the AI's pacing,
+  focus, and language throughout the entire session — not just the greeting.
+  Four modes (Morning / Afternoon / Evening / Late night) each with an
+  energy level, focus area, and language register. Blends with the
+  archetype so tone = archetype, pacing = time-of-day.
+- **Human-readable timestamp** in greeting. Hook now exports
+  `LOCAL_TIME_HUMAN` (e.g., "Tuesday, April 21 at 5:55 PM") and the
+  greeting instruction directs the AI to include a lightweight time
+  anchor so moments feel grounded instead of floating.
+- **Expression style follows archetype**: emoji, formatting flourishes,
+  exclamation marks, and emotional language are now explicitly
+  archetype-driven. Warm archetypes (Collaborator, Mentor, Companion) get
+  light emoji (❤️ 🌱 ✨ ☕ 🌙) and warmer language. Direct archetypes
+  (Sparring Partner, Pragmatist, Architect) stay plain. Custom
+  archetypes: inferred from Personality line. Same principle both
+  surfaces.
+
+Inspired by the time-aware pattern in external prior art — but integrated
+as behavioral guidance at the session-context layer, not as a separate
+loadable feature.
+
+### Tests
++3 assertions (40 total, was 37) verifying Temporal behavior modes,
+Expression style, and human-readable timestamp are present in hook output.
+
 ## 3.2.0-alpha.5 — 2026-04-21
 
 ### Added
