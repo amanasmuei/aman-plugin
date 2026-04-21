@@ -3,6 +3,34 @@
 All notable changes to `aman-claude-code` (formerly `aman-plugin`) are
 documented in this file.
 
+## 3.2.0-alpha.9 — 2026-04-21
+
+### Fixed
+- **Eliminated redundant tool calls on wake-word.** alpha.8's "Step 0 —
+  call `identity_summary` or fall back to parsing core.md" instruction
+  was being taken literally by the LLM: Claude loaded the identity
+  skill, ran `ls` on core.md paths, and Read the scope-aware file —
+  **three tool calls re-fetching data that was already injected into
+  the system context**. That was ~30 seconds + 3-6K wasted tokens per
+  session start. Replaced with a short directive: *"Who is who (read
+  from the identity snapshot ALREADY in your context — do NOT call
+  extra tools to re-fetch)."* Zero extra tool calls on wake-word now.
+
+### Changed
+- **amem guidance trimmed 46 → 18 lines** (60% reduction). Kept the
+  load-bearing rules (when to store, when to recall, privacy, session
+  close). Dropped verbose examples, cross-surface sync recap (already
+  implicit), tier explanation (niche), and admin/self-heal notes
+  (niche). LLM behaviour is instruction-signal, not instruction-volume
+  — the shorter block actually improves compliance.
+
+### Context size
+- Hook-injected system context: ~350 → ~290 lines (17% reduction with
+  real identity + rules). Compounds with future skill extraction.
+
+### Tests
+No assertion changes — existing 45 still pass.
+
 ## 3.2.0-alpha.8 — 2026-04-21
 
 ### Fixed

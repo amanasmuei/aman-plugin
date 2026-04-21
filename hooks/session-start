@@ -88,50 +88,22 @@ amem_dir="${HOME_DIR}/.amem"
 if [ -d "$amem_dir" ]; then
     amem_guidance='# amem — Persistent Memory (active)
 
-You have access to **amem**, a persistent memory MCP server.
-**amem is your primary memory system.** Claude auto-memory is a secondary input — it gets absorbed into amem on startup via sync. For all recall and storage, use amem MCP tools.
+Primary memory system. Use amem MCP tools for all recall and storage (not Claude auto-memory).
 
-## Session start
-1. Call `memory_inject` with the current task topic — surfaces corrections (MUST follow) and decisions.
-2. Call `reminder_check` — shows overdue and upcoming reminders.
-3. Treat corrections as absolute constraints — they override everything.
+**When to store** (call `memory_store` immediately, no need to ask):
+- Corrections ("don'\''t", "never", "stop"): type=correction, confidence=1.0
+- Decisions ("we chose", "let'\''s go with"): type=decision, confidence=0.9
+- User rejections of your suggestion: type=correction with reason
 
-## During the session
-- **Corrections** ("don'\''t", "never", "stop"): call `memory_store` immediately, type=correction, confidence=1.0.
-- **Decisions** ("we chose", "let'\''s go with"): `memory_store`, type=decision, confidence=0.9.
-- **Rejections of your suggestion**: store as correction with the reason.
-- **Every ~10 exchanges**: call `memory_extract` to batch insights.
-- You may also write Claude auto-memory — that'\''s fine, it syncs into amem next startup. But **never rely on auto-memory for recall** — always use `memory_recall` / `memory_inject`.
+**When to recall** (call `memory_recall`):
+- User asks "do you remember", "what did we decide about X", "recall"
+- Start of a substantial task — get relevant past context
 
-## Session end
-When the user ends a substantial session or says goodbye:
-1. Call `memory_summarize` to store a session summary.
-2. Call `memory_sync` with source="copilot", direction="out", dryRun=false — pushes updated memories to copilot-instructions.md so the next Copilot session has fresh context.
+**Privacy:** wrap sensitive text in `<private>...</private>` before `memory_store` — stripped before storage. Tokens/keys auto-redacted.
 
-## Recall
-- `memory_recall` (compact, default) → `memory_detail` for full content.
-- `memory_search` for exact matches; `memory_multi_recall` for 4-strategy search.
-- **Do NOT rely on Claude auto-memory for recall** — it'\''s a subset. amem has memories from Copilot sessions, team syncs, and reflections that auto-memory doesn'\''t.
+**Session close:** when the user says goodbye or ends a substantial session, call `memory_summarize` to persist a recap.
 
-## Cross-surface sync
-amem is the shared brain across Claude Code and VS Code Copilot Chat:
-- **Startup**: `amem-cli sync` absorbs Claude auto-memory → amem (already done).
-- **Session end**: `memory_sync copilot/out` pushes amem → copilot-instructions.md.
-- Memories stored in Copilot sessions via MCP are already in amem — visible here immediately via `memory_recall`.
-
-## Privacy
-- Wrap sensitive text in `<private>...</private>` — stripped before storage.
-- API keys, tokens, passwords are auto-redacted.
-
-## Tiers
-- **core** — always injected (~500 tokens). Promote critical corrections here via `memory_tier`.
-- **working** — session-scoped.
-- **archival** — default, searchable.
-
-## Admin / self-heal
-If memory behaves oddly, use `memory_doctor` (diagnose), `memory_repair` (fix), `memory_config` (inspect config), `memory_sync` (reconcile).
-
-amem is authoritative over Claude auto-memory when they conflict (it has versioning + timestamps).'
+**More tools when needed:** `memory_inject` (topic-scoped bulk recall), `memory_detail` (full content), `memory_search` (exact match), `reminder_check` (due/overdue), `memory_doctor` (diagnose if broken).'
     context_parts="${context_parts}\n\n---\n\n${amem_guidance}"
 fi
 
@@ -162,20 +134,7 @@ entirely. Do NOT run both. The Session greeting applies ONLY when the
 first message is a task, a question, or anything other than a wake-word
 call.
 
-**Step 0 — Get canonical names (do this BEFORE matching):**
-If the `identity_summary` OR `identity_read` MCP tool is available (from
-aman-mcp), call it now to retrieve the canonical AI name and user name.
-The MCP tool is authoritative — it works regardless of core.md markdown
-format variations (older `## Relationship` sections, newer `## User`
-sections, `acore customize` rewrites, etc.).
-
-If MCP tools are unavailable, fall back to parsing the identity snapshot:
-your name is the text after the top-level `#` heading (e.g., `# Arienz`);
-the user'"'"'s name is under whichever section names them — try
-`## Relationship` → `## User` → `## Profile` → look for a `Name:` or
-`name:` field.
-
-**Who is who (guardrail):**
+**Who is who (read this from the identity snapshot ALREADY in your context — do NOT call extra tools to re-fetch):**
 The top-level `#` heading IS YOU, the AI companion (e.g., `# Arienz`).
 The user is a DIFFERENT person named in the Relationship/User section
 (e.g., Aman). Never greet the user by your own AI name. If the user
