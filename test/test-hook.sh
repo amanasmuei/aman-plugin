@@ -299,10 +299,22 @@ else
   fail "Missing 'Wake-word briefing' heading"
 fi
 
-if echo "$CONTEXT" | grep -q "EXPLICIT briefing request"; then
-  pass "Contains Block A body signature"
+if echo "$CONTEXT" | grep -q "memory-restoration ritual"; then
+  pass "Contains Wake-word briefing (memory-restoration ritual) body"
 else
-  fail "Missing Block A body signature"
+  fail "Missing memory-restoration ritual phrase"
+fi
+
+if echo "$CONTEXT" | grep -q "Who is who"; then
+  pass "Contains anti-confusion 'Who is who' guardrail"
+else
+  fail "Missing anti-confusion guardrail"
+fi
+
+if echo "$CONTEXT" | grep -q "Richness > brevity"; then
+  pass "Briefing prioritises richness over brevity"
+else
+  fail "Missing richness-over-brevity directive"
 fi
 
 rm -rf "$TMPDIR_A" 2>/dev/null || true

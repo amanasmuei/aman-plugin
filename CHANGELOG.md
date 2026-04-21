@@ -3,6 +3,38 @@
 All notable changes to `aman-claude-code` (formerly `aman-plugin`) are
 documented in this file.
 
+## 3.2.0-alpha.7 — 2026-04-21
+
+### Changed
+- **Wake-word briefing rewritten as a grounded memory-restoration ritual.**
+  The previous instruction told Claude to keep the briefing "under 6 lines" —
+  which produced generic warm greetings that skipped most of the context-
+  loading work. The new briefing is explicitly Kiyoraka-inspired in depth:
+
+  | Step | Line budget | Content |
+  |---|---|---|
+  | 1. Memory restoration | 1 | "Memory restored — Arienz here." (emoji if archetype allows) |
+  | 2. Greeting + time anchor + user's name | 1 | Address from Relationship section, include time-of-day anchor |
+  | 3. Project context | 1–2 | If `.acore/context.md` is loaded: project name, stack, last resume point |
+  | 4. Recent reasoning path | 1 | `memory_recall("session narrative")` paraphrased |
+  | 5. Pending items | 1 | `reminder_check` + `<aman-suggestion-notice>` |
+  | 6. Forward prompt | 1 | Archetype-matched opener |
+
+  Target: 4–8 lines. **Richness > brevity.**
+
+### Fixed
+- **Anti-confusion guardrail** opens the wake-word block with explicit
+  "who is who" — the Identity `name` is the AI; the Relationship `name` is
+  the user. Previously the LLM sometimes echoed the user's wake-word input
+  ("arienz") back as their name ("Evening, arienz"), treating its own
+  identity name as the user's. The guardrail plus a case-insensitive
+  trigger (`arienz`, `Arienz`, `ARIENZ` all match) closes that bug.
+
+### Tests
++3 assertions (42 total, was 40) verifying the memory-restoration ritual,
+the "Who is who" guardrail, and the "Richness > brevity" directive are
+present in hook output.
+
 ## 3.2.0-alpha.6 — 2026-04-21
 
 ### Added
