@@ -196,7 +196,7 @@ Sarah: Morning, Aman — you're in myapp-frontend (Node/TypeScript).
        due today. What's next?
 ```
 
-The card is written automatically when you run `npx @aman_asmuei/aman@latest` in a repo with a detectable stack. It captures Stack, Domain, Focus, Session, Active topics, Recent decisions, and Project Patterns — edit it directly as you work. No file? No problem: the block is silently skipped, and you get today's single-project behavior.
+Create the card on demand with **`npx @aman_asmuei/aman here`** (fast, single-purpose — writes the card for the current repo and exits), or let the full `npx @aman_asmuei/aman@latest` setup wizard detect your stack and write one automatically. The card captures Stack, Domain, Focus, Session, Active topics, Recent decisions, and Project Patterns — edit it directly as you work. No file? No problem: the block is silently skipped, and you get today's single-project behavior.
 
 > **Part of a multi-project roadmap.** Path 1 (project context) shipped in v3.2.0-alpha.3. Path 2 (per-project memory tagging in amem) and Path 3 (first-class project registry) are still on the roadmap — this release is a foundation, not a full multi-project system.
 
