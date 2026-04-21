@@ -19,7 +19,7 @@ Auto-loads your identity, memory, tools, workflows, guardrails, and skills — e
 [![Tests](https://img.shields.io/badge/tests-20%20passing-brightgreen.svg?style=flat-square)](./test/test-hook.sh)
 [![Engine](https://img.shields.io/badge/engine-v1-informational.svg?style=flat-square)](./docs/engine-v1.md)
 
-[Quickstart](#quickstart) · [Updating](#updating) · [Managing Your AI](#managing-your-ai) · [Slash Commands](#slash-commands) · [Live Tools](#live-tools-aman-mcp) · [Troubleshooting](#troubleshooting) · [Ecosystem](#the-ecosystem)
+[Install](#install) · [Features](#features) · [How to use](#how-to-use) · [Troubleshooting](#troubleshooting) · [Ecosystem](#the-ecosystem) · [Updating](#updating)
 
 </div>
 
@@ -42,78 +42,15 @@ Auto-loads your identity, memory, tools, workflows, guardrails, and skills — e
 
 ---
 
-## The Problem
+## Why this exists
 
-Even with the aman ecosystem set up, you still have to manually inject identity files, remember which slash commands do what, and manage platform config files. The gap between *"ecosystem configured"* and *"AI actually loads it"* is annoying.
-
-## The Solution
-
-**aman-claude-code** bridges that gap for Claude Code. Install once, and your full AI ecosystem loads automatically every session — identity, rules, memory, tools, workflows, and skills.
-
-```bash
-claude plugin marketplace add amanasmuei/aman-claude-code
-claude plugin install aman-claude-code@aman
-```
-
-> **No more CLAUDE.md injection. No manual setup. It just works.**
-
-> **Also use VS Code Copilot Chat or the Copilot CLI?** Install the sibling adapter — same identity, same rules, same memory, three surfaces:
->
-> ```bash
-> npx @aman_asmuei/aman-copilot init              # any project
-> npx @aman_asmuei/aman-copilot install-mcp --all # VS Code + Copilot CLI
-> ```
->
-> `--all` writes to both VS Code's `mcp.json` and Copilot CLI's `~/.copilot/mcp-config.json` in one call, seeds the `dev:copilot` scope from your existing aman-claude-code identity, and preserves any other MCP servers you have configured. See [aman-copilot](https://github.com/amanasmuei/aman-copilot) for details. One ecosystem, two IDEs, one terminal CLI, zero duplication.
+Even with the aman ecosystem set up, you still have to manually inject identity files, remember which slash commands do what, and manage platform config files. The gap between *"ecosystem configured"* and *"AI actually loads it"* is annoying. **aman-claude-code** bridges that gap for Claude Code. Install once, and your full AI ecosystem loads automatically every session — identity, rules, memory, tools, workflows, and skills. No CLAUDE.md injection. No manual setup per project.
 
 ---
 
-## What's new in v3.2.0-alpha.2 — wake-word ritual + tier loaders
+## Install
 
-Two new session-time UX moments land in this release.
-
-**Wake-word briefing.** Type your AI's name as the first message of a session and you get a real briefing — last session narrative, today's reminders, pending rule suggestions — instead of silent auto-load. It's a natural way to open a session without having to ask "what did we work on last time?"
-
-**Tier-loader phrases.** Say `load memory`, `load rules`, `load workflows`, or any of the catalog phrases listed below, and the plugin runs the appropriate `npx` command for you — no need to remember package names or flags. Useful when you're mid-conversation and realize a layer is missing.
-
-See [Wake-word briefing](#wake-word-briefing) and [Tier upgrades by phrase](#tier-upgrades-by-phrase) below.
-
----
-
-## Passive rule observer (opt-in, v3.2.0-alpha.1+)
-
-Set `AMAN_OBSERVER_ENABLED=1` in your shell to enable the passive observer. It watches your Claude Code conversations for repeated corrections (e.g., "don't commit without tests" said 3 times across sessions) and queues them as rule suggestions.
-
-On the next session start, you'll see one line: `3 rule suggestions pending — run /rules review`. No mid-conversation interrupts; zero LLM cost.
-
-Review suggestions with:
-
-- `/rules review --list` — show pending suggestions with index
-- `/rules accept <n>` — promote suggestion N to a real rule (calls arules-core)
-- `/rules reject <n>` — dismiss; won't resurface (sha256-blocklisted)
-
-The observer stores ephemeral state in `~/.arules/dev/plugin/.tally.tsv` (drained on promotion) and a human-readable queue in `~/.arules/dev/plugin/suggestions.md`. See `docs/superpowers/specs/2026-04-20-passive-hook-observer-design.md` for the full design.
-
-### Opt-in, not default
-
-The observer is gated behind `AMAN_OBSERVER_ENABLED=1` for the alpha. After one week of real use without major issues, v3.2.0 will default-enable (with an `AMAN_OBSERVER_DISABLED=1` off-switch preserved indefinitely).
-
-### Known limitations (v3.2.0-alpha.1)
-
-- English-only correction phrases; Bahasa Malaysia and other languages planned.
-- Writes only to the `dev:plugin` scope; per-repo scopes planned.
-- No LLM-based deduplication of semantically-equivalent phrases.
-- `/rules review` ships `--list` + index-based accept/reject; a fully interactive readline loop lands in v3.2.0-beta.
-
----
-
-## Quickstart
-
-Six steps. Under five minutes.
-
-### Step 1 — Check requirements
-
-You need:
+### 1. Requirements
 
 | Requirement | Check | Get it |
 |:---|:---|:---|
@@ -121,20 +58,23 @@ You need:
 | **Claude Code** | `claude --version` | https://docs.claude.com/claude-code |
 | **jq** *(optional, for tests)* | `jq --version` | `brew install jq` / `apt install jq` |
 
-### Step 2 — Set up the aman ecosystem
+### 2. Set up the aman ecosystem + install the plugin
 
-The plugin loads files the ecosystem writes to your home directory. Run the one-shot installer:
+Run the one-shot ecosystem installer, then add the plugin:
 
 ```bash
+# Set up identity, guardrails, and eval
 npx @aman_asmuei/aman@latest
+
+# Register the marketplace and install the plugin
+claude plugin marketplace add amanasmuei/aman-claude-code
+claude plugin install aman-claude-code@aman
+
+# Install live MCP tools (read/write during sessions)
+node ~/.claude/plugins/cache/aman/aman-claude-code/*/bin/install-mcp.mjs
 ```
 
-This walks you through setting up `acore` (identity), `arules` (guardrails), and `aeval` (relationship tracking).
-
-> **New in acore 0.7.0:** developer archetypes now ship with **Fundamental Truths** — short self-anchoring assertions the AI re-reads each session so it stays in character across long conversations (e.g. The Mentor stays patient; The Pragmatist keeps leading with the answer). Non-breaking, additive. See [acore#1](https://github.com/amanasmuei/acore/issues/1) for the design story.
-
-> **Why `npx @latest` and not `npm install -g`?**
-> These are one-shot setup commands — run once, done. `npx` keeps your global `node_modules` clean and avoids `sudo` / permission issues on macOS and Linux. The explicit `@latest` tag matters: **npx caches binaries**, so if you (or your friend) ran a package yesterday you may get the cached older version on the next run. `@latest` forces a fresh resolve against the npm registry. If you *really* want a global install, `npm install -g @aman_asmuei/aman` works too — but it's not recommended for most users.
+The `aman@latest` wizard walks you through `acore` (identity), `arules` (guardrails), and `aeval` (relationship tracking). The plugin install wires a `SessionStart` hook that fires on every session start, resume, clear, and compact. The `install-mcp.mjs` step is idempotent and preserves any other MCP servers in your config.
 
 <details>
 <summary><b>Prefer to install layers individually?</b></summary>
@@ -151,26 +91,8 @@ Each installer is idempotent — safe to re-run.
 
 </details>
 
-### Step 3 — Install the plugin
-
-Claude Code installs plugins from **marketplaces**. This repo ships its own marketplace manifest, so you add it as a marketplace once, then install the plugin from it:
-
-```bash
-# 1. Register this repo as a marketplace
-claude plugin marketplace add amanasmuei/aman-claude-code
-
-# 2. Install the plugin from it
-claude plugin install aman-claude-code@aman
-```
-
-Claude Code registers the plugin and wires its `SessionStart` hook. From now on, the hook fires automatically on every session start, resume, clear, and compact.
-
 <details>
-<summary><b>Other ways to install</b></summary>
-
-**From inside Claude Code** — use the `/plugin` slash command, then pick `aman-claude-code` after adding the marketplace.
-
-**From a local clone** — useful for development:
+<summary><b>Install the plugin from a local clone</b></summary>
 
 ```bash
 git clone https://github.com/amanasmuei/aman-claude-code ~/aman-claude-code
@@ -178,174 +100,51 @@ claude plugin marketplace add ~/aman-claude-code
 claude plugin install aman-claude-code@aman
 ```
 
-**Verify the install:**
-
-```bash
-claude plugin list
-```
+Useful for development or testing unreleased changes.
 
 </details>
 
-### Step 4 — Install live tools (`aman-mcp`)
+<details>
+<summary><b>What does each layer provide?</b></summary>
 
-The hook gives Claude your identity as **text in the prompt** — fast, zero tool calls. For **live read/write during the session** (updating identity on the fly, rule-checking a proposed action, etc.), install the MCP server:
+| Layer | Path | What it provides |
+|:------|:-----|:-----------------|
+| **acore** | `~/.acore/dev/plugin/core.md` | AI personality and your preferences |
+| **arules** | `~/.arules/dev/plugin/rules.md` | Safety boundaries and permissions |
+| **akit** | `~/.akit/kit.md` | Available tools and capabilities |
+| **aflow** | `~/.aflow/flow.md` | Multi-step workflow definitions |
+| **askill** | `~/.askill/skills.md` | Domain expertise |
+| **amem** | `~/.amem/` *(runtime MCP)* | Persistent memory |
 
-```bash
-node ~/.claude/plugins/cache/aman/aman-claude-code/*/bin/install-mcp.mjs
-```
+</details>
 
-This is **idempotent**, **preserves any other MCP servers** in your config, and works on macOS, Linux, and Windows. It pins `@aman_asmuei/aman-mcp@^0.6.0` to prevent drift.
+### 3. Add persistent memory
 
-> **Where does that path come from?** Claude Code caches marketplace-installed plugins at `~/.claude/plugins/cache/<marketplace>/<plugin>/<version>/`. Since this plugin ships in a marketplace named `aman`, the `*` glob picks whichever version is currently installed.
-
-### Step 5 — Add persistent memory *(recommended)*
-
-Memory is provided by the **amem plugin** — a separate Claude Code plugin from the same ecosystem. Install it alongside aman-claude-code:
+Memory is provided by the **amem plugin** — a separate Claude Code plugin from the same ecosystem:
 
 ```bash
 claude plugin marketplace add amanasmuei/amem
 claude plugin install amem@amem
-```
-
-This gives you:
-
-- The **`amem-memory` MCP server** (~30 tools: `memory_store`, `memory_recall`, `memory_inject`, `memory_doctor`, etc.)
-- **Memory skills** — `/remember`, `/recall`, `/context`, `/dashboard`, `/sync`
-- **Automatic extraction** via a `PostToolUse` hook (learns from tool calls)
-- **Session-end consolidation** via a `Stop` hook
-
-Then initialize the local database once:
-
-```bash
 npx @aman_asmuei/amem@latest init
 ```
 
-Once `~/.amem/` exists, aman-claude-code's session-start hook **auto-detects it** and injects memory-usage guidance. Claude will proactively use the amem MCP tools during every session.
+> **Note:** `amem init` downloads the embedding model and stays in the foreground. Once you see `Embedding model loaded`, press `Ctrl+C` — Claude Code spawns its own amem process via the plugin when needed.
 
-> **Heads up — `amem init` keeps running.** The first run downloads the embedding model and then **stays in the foreground as an MCP server**. Once you see lines like `Vector index built: N vectors` and `Embedding model loaded`, initialization is complete — **press `Ctrl+C` to exit**. Claude Code spawns its own amem process via the plugin when needed, so you don't need to keep this one running.
+Verify by starting a Claude Code session; identity auto-loads and Claude will proactively use amem tools.
 
-> **Why two plugins?** aman-claude-code handles identity, rules, tools, workflows, eval (the acore/arules/akit/aflow/aeval layers). amem-plugin handles persistent memory. They're complementary and have no overlap — together they form the full aman ecosystem for Claude Code.
+In that session, try:
 
-### Step 6 — Verify
-
-Restart Claude Code. In a new session, try:
-
-- [ ] *"What do you know about me?"* — Claude should reference details from your `acore` identity.
-- [ ] *"Read my identity with the MCP tool."* — Claude should call `identity_read` and return your config. *(requires Step 4)*
-- [ ] *"Remember that I prefer pnpm over npm."* — Claude should call `memory_store`. *(requires Step 5 — amem plugin)*
-
-<details>
-<summary><b>Run the test suite</b></summary>
-
-```bash
-bash test/test-hook.sh
-```
-
-Expected: `Results: 20 passed, 0 failed, 20 total`
-
-</details>
-
-<details>
-<summary><b>Inspect what the hook injects into your session</b></summary>
-
-```bash
-bash hooks/session-start | jq -r '.additional_context' | head -40
-```
-
-You should see your identity, rules, and (if amem is installed) memory guidance.
-
-</details>
+- *"What do you know about me?"* — Claude should reference details from your `acore` identity.
+- *"Read my identity with the MCP tool."* — Claude should call `identity_read` and return your config.
+- *"Remember that I prefer pnpm over npm."* — Claude should call `memory_store`.
 
 ---
 
-## Updating
-
-To pull the latest version from the marketplace:
-
-```bash
-claude plugin marketplace update aman
-claude plugin update aman-claude-code@aman
-```
-
-Then `/reload-plugins` inside Claude Code (or restart). The first command re-fetches the marketplace manifest from GitHub; the second applies the new version to your install. Always use `aman-claude-code@aman` (with the marketplace qualifier) — the bare `aman-claude-code` will return *"Plugin not found"*.
-
-> **Tip:** run `claude plugin list` to see what's installed and at which scope (`user` or `project`). If you see the same plugin listed twice, you probably installed it once globally and once inside a project — keep the `user` scope one and uninstall the other with `claude plugin uninstall aman-claude-code@aman --scope project`.
-
-See [CHANGELOG.md](CHANGELOG.md) for what's new in each release.
-
----
-
-## Managing Your AI
-
-Once the plugin is installed, you have **two ways** to manage your identity, rules, and memory — use whichever feels natural.
-
-### First-time setup → use the CLI
-
-The `npx @aman_asmuei/acore` wizard gives you the best onboarding:
-
-- Auto-detected name from `git config`
-- Auto-detected platform (writes to the right file for Claude Code, Cursor, etc.)
-- **Visual archetype picker** with all 25 options
-- Creates the identity file at the correct scope-aware path
-
-```bash
-npx @aman_asmuei/acore@latest         # identity — one-time, 15 seconds
-npx @aman_asmuei/arules@latest init   # guardrails — one-time
-```
-
-### Day-to-day → just talk to Claude
-
-After the initial bootstrap, **you don't need the CLI anymore**. The plugin's `identity`, `rules`, `tools`, `workflows`, and `eval` skills — combined with the `aman-mcp` live tools from [Step 4](#step-4--install-live-tools-aman-mcp) — let Claude read and write your ecosystem files directly from inside any conversation:
-
-| Just say | Claude does |
-|:---|:---|
-| *"what do you know about me?"* | Calls `identity_read`, reads your personality aloud |
-| *"update my personality to The Mentor"* | Calls `identity_update_section` |
-| *"add a boundary: never force-push to main"* | Calls `rules_add` |
-| *"is this action allowed?"* | Calls `rules_check` against your guardrails |
-| *"remember that I prefer pnpm over npm"* | Calls `memory_store` (requires amem plugin) |
-| *"what have I told you about testing?"* | Calls `memory_recall` |
-| *"log this session"* | Calls `eval_log` |
-
-No slash commands needed — the plugin's skills auto-trigger on natural language. You can also invoke them explicitly with `/aman-claude-code:identity`, `/aman-claude-code:rules`, etc.
-
-> **Can I skip the CLI entirely?** Technically yes — Claude can call `identity_update_section` to build a fresh config from a prompt like *"set up my identity, I'm a developer, use the Pragmatist archetype"*. But you'll miss the visual archetype picker and auto-detection. For first-time setup, the 15-second CLI run is worth it.
-
----
-
-## What It Does
-
-### Auto-loads your AI identity every session
-
-The session-start hook reads your ecosystem files and injects them into every conversation. It is **engine v1 aware** — each layer is checked at the new scope-aware path first, then falls back to the legacy single-tenant path. Scope: `dev:plugin`.
-
-| Layer | Engine v1 path (preferred) | Legacy fallback | What it provides |
-|:------|:---------------------------|:----------------|:-----------------|
-| **acore** | `~/.acore/dev/plugin/core.md` | `~/.acore/core.md` | AI personality and your preferences |
-| **arules** | `~/.arules/dev/plugin/rules.md` | `~/.arules/rules.md` | Safety boundaries and permissions |
-| **akit** | — | `~/.akit/kit.md` | Available tools and capabilities |
-| **aflow** | — | `~/.aflow/flow.md` | Multi-step workflow definitions |
-| **askill** | — | `~/.askill/skills.md` | Domain expertise |
-| **amem** | `~/.amem/` *(runtime MCP)* | — | Persistent memory: corrections, decisions, reminders |
-
-> **Engine v1 status:** `acore` and `arules` are the two essentials extracted into multi-tenant libraries (`@aman_asmuei/acore-core`, `@aman_asmuei/arules-core`). `akit`, `aflow`, and `askill` remain dormant single-tenant layers in v1 — they wake up in engine v2.
-
-The hook also exports `AMAN_MCP_SCOPE=dev:plugin` so any MCP tool spawned during the session automatically uses the right scope.
-
-### Proactive behavior
-
-| Trigger | Action |
-|:--------|:-------|
-| **Session start / resume / clear** | Loads identity, rules, and memory guidance into context |
-| **Corrections** (*"don't"*, *"never"*, *"stop"*) | Stores in amem as absolute constraints |
-| **Architecture decisions** | Stores as versioned decisions in amem |
-| **Before risky actions** | Checks against your guardrails |
-| **During tasks** | Follows matching workflows automatically |
-| **Session end** | Offers to save what the AI learned; offers `/session-narrative` for substantial sessions where the reasoning path matters |
+## Features
 
 ### Wake-word briefing
 
-Type your AI's name as the first message of a session and you get a real briefing instead of a silent "hello":
+Type your AI's name as the first message of a session and you get a real briefing — last session narrative, today's reminders, pending rule suggestions — instead of a silent "hello":
 
 ```text
 You: Sarah
@@ -357,9 +156,9 @@ Sarah: Morning, Aman — today's the 21st. Last session we wired up
        when you're ready. What's next?
 ```
 
-Triggered only when your first message is just the AI's name (or a greeting with the name, like `hi Sarah`). If the first message is already a task (`Sarah, fix the login bug`), the plugin folds the greeting into the task opener as before — no noise added. Skipped automatically if you haven't personalized the name (still set to `Companion`).
+Triggered only when your first message is just the AI's name (or a greeting with the name, like `hi Sarah`). If the first message is already a task (`Sarah, fix the login bug`), the plugin folds the greeting into the task opener — no noise added. Skipped if the name is still set to `Companion`.
 
-### Tier upgrades by phrase
+### Tier-loader phrases
 
 Don't remember which `npx` command adds which layer? Just ask in plain language:
 
@@ -383,63 +182,32 @@ Full catalog:
 | `load tools`      | `npx @aman_asmuei/akit add <name>`        | Tool kits (Claude asks which) |
 | `load skills`     | `npx @aman_asmuei/askill add <name>`      | Plugin skills (Claude asks which) |
 
-If a layer is already installed, Claude asks before re-running. Subcommands that need an argument (tools, skills) get an interactive "which one?" prompt before executing.
+If a layer is already installed, Claude asks before re-running.
 
----
+### Identity that persists
 
-## Slash Commands
+Every session auto-loads `core.md` via the session-start hook. Claude greets you by name, adjusts for time of day, and picks up from where you left off — without you asking. The hook exports `AMAN_MCP_SCOPE=dev:plugin` so every MCP tool spawned during the session uses the right scope automatically.
 
-| Command | What it does |
-|:--------|:-------------|
-| `/identity` | View or update your AI identity |
-| `/tools` | View installed tools, search the registry |
-| `/workflows` | List workflows, follow them during tasks |
-| `/rules` | Check guardrails, validate actions |
-| `/eval` | Log sessions, view relationship report |
-| `/session-narrative` ⭐ | Save a 300–500 word flowing-prose narrative of the session's reasoning path to amem (or Claude auto-memory if amem isn't installed) |
+### Guardrails (arules) + passive observer
 
-> **Memory commands** (`/remember`, `/recall`, `/context`, `/dashboard`, `/sync`) are provided by the separate **amem plugin** — see [Step 5](#step-5--add-persistent-memory-recommended) to install it.
->
-> **`/session-narrative` is the companion to aman-copilot's prompt file of the same name.** Same protocol, same memory store, same output shape — works on all three surfaces (Claude Code, VS Code Copilot Chat, Copilot CLI) because they share memory via amem's dev:* scope inheritance. Use it at the end of any substantial session where the reasoning path matters, not just the final decisions.
+Guardrails live in `rules.md`; the `rules_check` MCP tool consults them before risky actions. The passive observer (opt-in via `AMAN_OBSERVER_ENABLED=1`) watches for repeated corrections across sessions and queues them as rule suggestions. Review and promote them with `/rules review` — no mid-conversation interrupts, zero LLM cost.
 
----
+### Memory (amem)
 
-## Memory 101 — getting the most out of amem
+Persistent memory runs via the `amem-memory` MCP server. It provides `memory_store`, `memory_recall`, `memory_inject`, `reminder_check`, and ~24 more tools. Memory is shared across Claude Code and aman-copilot through amem's `dev:*` scope inheritance — one brain, multiple surfaces.
 
-Your AI doesn't save everything automatically — it saves what you tell it to save, using natural language phrases the AI has been instructed to listen for. If you skip the phrases, memory silently fails.
+The most underused feature is the **session narrative**: at the end of a substantial session, say *"save a session narrative"* and Claude writes a 300–500 word prose memory note covering what was tried, what worked, what was decided, and why. Unlike scattered `memory_store` calls, the narrative captures the reasoning path — the attempts, the dead ends, the pivot moments. Next session, recall returns the whole story.
 
-**The 30-second version:**
+See [amem](https://github.com/amanasmuei/amem) for depth on memory tiers, privacy, and the full phrase catalog.
 
-```
-SAVE:    "remember that X"          → fact
-         "don't X" / "never X"      → correction (always wins)
-         "we decided X"             → decision
-         "I prefer X over Y"        → preference
+### Live tools (aman-mcp)
 
-RECALL:  "what do you remember about X"
-         "check your memory for X"
-
-SESSION: "save a session narrative"   ← ⭐ preserves the reasoning path
-         "log this session"
-         "what did we figure out?"
-
-PRIVACY: wrap sensitive text in <private>...</private>
-```
-
-**The session narrative pattern** (⭐) is the most underused and most valuable. At the end of a substantial session, say *"save a session narrative"* — the AI writes a 300–500 word flowing-prose memory note covering what we tried, what worked, what didn't, what we decided, and why. Unlike scattered `memory_store` calls (which capture decisions), the narrative captures the **reasoning path** — the attempts, the dead ends, the pivot moments. Next session, recall on that narrative returns the whole story.
-
-**Full guide:** [amem prompt best practices](https://github.com/amanasmuei/amem/blob/main/docs/guides/prompt-best-practices.md) — phrase catalog in depth, memory tiers, privacy, debugging, and the philosophy of curated memory over raw transcripts.
-
----
-
-## Live Tools (`aman-mcp`)
-
-`aman-mcp` provides **31 MCP tools**, all scope-aware via `dev:plugin`.
+`aman-mcp` provides ~31 MCP tools across all ecosystem layers, all scope-aware via `dev:plugin`. These are for live read/write during a session — updating identity on the fly, rule-checking a proposed action, logging a milestone.
 
 <details>
-<summary><b>Full tool catalog (click to expand)</b></summary>
+<summary><b>Tool categories</b></summary>
 
-| Category | Count | Tools |
+| Category | Count | Sample tools |
 |:---|:---:|:---|
 | **Identity** | 6 | `identity_read`, `identity_summary`, `identity_update_section`, `identity_update_session`, `identity_update_dynamics`, `avatar_prompt` |
 | **Rules** | 5 | `rules_list`, `rules_check`, `rules_add`, `rules_remove`, `rules_toggle` |
@@ -451,79 +219,85 @@ PRIVACY: wrap sensitive text in <private>...</private>
 
 </details>
 
-For **persistent memory**, install [amem](https://github.com/amanasmuei/amem) separately — it adds ~30 more MCP tools including `memory_store`, `memory_recall`, `memory_inject`, plus self-heal utilities (`memory_doctor`, `memory_repair`, `memory_config`, `memory_sync`).
+See [aman-mcp](https://github.com/amanasmuei/aman-mcp) for the full catalog.
 
-<details>
-<summary><b>Manual install (edit JSON yourself)</b></summary>
+---
 
-Add this block to `~/.claude.json` under `mcpServers`:
+## How to use
 
-```json
-{
-  "mcpServers": {
-    "aman": {
-      "command": "npx",
-      "args": ["-y", "@aman_asmuei/aman-mcp@^0.6.0"],
-      "env": {
-        "AMAN_MCP_SCOPE": "dev:plugin"
-      }
-    }
-  }
-}
-```
+### Day-to-day
 
-Then restart Claude Code.
+Natural-language patterns the plugin is instructed to act on:
 
-</details>
+| Just say | Claude does |
+|:---|:---|
+| *"what do you know about me?"* | Calls `identity_read`, reads your personality aloud |
+| *"update my personality to The Mentor"* | Calls `identity_update_section` |
+| *"add a boundary: never force-push to main"* | Calls `rules_add` |
+| *"is this action allowed?"* | Calls `rules_check` against your guardrails |
+| *"remember that I prefer pnpm over npm"* | Calls `memory_store` |
+| *"what have I told you about testing?"* | Calls `memory_recall` |
+| *"save a session narrative"* | Stores a prose narrative of the session's reasoning path |
+| *"log this session"* | Calls `eval_log` |
+| `load archetype`, `load memory`, `load rules` | Tier-loader runs the matching `npx` command |
+| First message is your AI's name | Wake-word briefing fires |
 
-<details>
-<summary><b>Uninstall aman-mcp</b></summary>
+### Slash commands
 
-```bash
-node ~/.claude/plugins/cache/aman/aman-claude-code/*/bin/uninstall-mcp.mjs
-```
+| Command | What it does |
+|:--------|:-------------|
+| `/identity` | View or update your AI identity |
+| `/tools` | View installed tools, search the registry |
+| `/workflows` | List workflows, follow them during tasks |
+| `/rules` | Check guardrails, validate actions |
+| `/eval` | Log sessions, view relationship report |
+| `/session-narrative` ⭐ | Save a 300–500 word prose narrative of the session's reasoning path to amem |
 
-</details>
+Memory commands (`/remember`, `/recall`, `/context`, `/dashboard`, `/sync`) are provided by the separate **amem plugin**.
+
+### Changing your AI
+
+Run `npx @aman_asmuei/acore@latest customize` to change personality via the CLI archetype picker. Or say `load archetype` in a session and Claude walks you through the options interactively. Identity auto-reloads on the next session start.
 
 ---
 
 ## Troubleshooting
 
 <details>
-<summary><b>The plugin is installed but Claude doesn't seem to know my identity.</b></summary>
+<summary><b>Plugin is installed but Claude doesn't know my identity.</b></summary>
 
-1. **Restart Claude Code.** Plugins only attach on fresh sessions.
-2. **Confirm the hook runs:**
-   ```bash
-   bash hooks/session-start | jq -r '.additional_context' | head -c 400
-   ```
-   You should see your identity content.
-3. **Confirm your identity file exists:**
-   ```bash
-   ls ~/.acore/dev/plugin/core.md 2>/dev/null || ls ~/.acore/core.md
-   ```
-4. If neither exists, you haven't set up the ecosystem yet — run `npx @aman_asmuei/aman@latest`.
+Restart Claude Code — plugins only attach on fresh sessions. Then confirm the hook runs:
+
+```bash
+bash hooks/session-start | jq -r '.additional_context' | head -c 400
+```
+
+If the hook output is empty, confirm `~/.acore/dev/plugin/core.md` or `~/.acore/core.md` exists. If neither does, run `npx @aman_asmuei/aman@latest`.
 
 </details>
 
 <details>
-<summary><b><code>aman-mcp</code> tools don't appear in Claude Code.</b></summary>
+<summary><b>Slash commands are missing.</b></summary>
 
-1. Did you **restart Claude Code** after running `node bin/install-mcp.mjs`? MCP servers load on startup.
-2. **Check your config:**
-   ```bash
-   cat ~/.claude.json | jq .mcpServers.aman
-   ```
-   You should see an entry with `AMAN_MCP_SCOPE=dev:plugin`.
-3. **Check the MCP server is reachable:**
-   ```bash
-   npx -y @aman_asmuei/aman-mcp@^0.6.0 --help
-   ```
+Run `claude plugin list` and confirm `aman-claude-code` appears. If not, re-run the install steps. If listed but commands are absent, restart Claude Code — slash commands register at startup.
 
 </details>
 
 <details>
-<summary><b>amem tools / memory guidance aren't loading.</b></summary>
+<summary><b>MCP tools don't appear in Claude Code.</b></summary>
+
+Restart Claude Code after `install-mcp.mjs`. Then verify the entry exists:
+
+```bash
+cat ~/.claude.json | jq .mcpServers.aman
+```
+
+You should see an entry with `AMAN_MCP_SCOPE=dev:plugin`. If missing, re-run `node ~/.claude/plugins/cache/aman/aman-claude-code/*/bin/install-mcp.mjs`.
+
+</details>
+
+<details>
+<summary><b>amem isn't recalling memories.</b></summary>
 
 The plugin gates amem guidance on `~/.amem/` existing. Confirm:
 
@@ -531,110 +305,59 @@ The plugin gates amem guidance on `~/.amem/` existing. Confirm:
 ls -la ~/.amem
 ```
 
-If missing, run `npx @aman_asmuei/amem@latest init`. Then start a new Claude Code session.
+If missing, run `npx @aman_asmuei/amem@latest init`, then start a new session.
 
 </details>
 
 <details>
-<summary><b>How do I know which scope the plugin is using?</b></summary>
+<summary><b>Hook errors on session start.</b></summary>
 
-The plugin always uses `dev:plugin`. Verify:
+Run the hook manually to see the raw error:
 
 ```bash
-grep AMAN_MCP_SCOPE hooks/session-start
+bash hooks/session-start
 ```
+
+Most errors are missing ecosystem files (`~/.acore/`, `~/.arules/`). Re-run `npx @aman_asmuei/aman@latest` to regenerate them.
 
 </details>
 
 <details>
-<summary><b>I'm on engine v0 — will the plugin still work?</b></summary>
+<summary><b>How do I opt out of the passive observer?</b></summary>
 
-Yes. The hook tries engine-v1 scope-aware paths first, then automatically falls back to the legacy single-tenant paths (`~/.acore/core.md`, `~/.arules/rules.md`, etc.). Existing users keep working unchanged.
-
-</details>
-
-<details>
-<summary><b>How do I update the plugin?</b></summary>
-
-```bash
-claude plugin marketplace update aman
-claude plugin update aman-claude-code@aman
-```
-
-> **Note:** always use the fully-qualified `aman-claude-code@aman` form (plugin name + marketplace name). The bare `aman-claude-code` will fail with *"Plugin not found"* because Claude Code needs the marketplace qualifier to disambiguate.
-
-Then restart Claude Code. See [CHANGELOG.md](CHANGELOG.md) for what changed.
-
-</details>
-
-<details>
-<summary><b>How do I uninstall everything?</b></summary>
-
-```bash
-node ~/.claude/plugins/cache/aman/aman-claude-code/*/bin/uninstall-mcp.mjs  # removes aman-mcp from ~/.claude.json
-claude plugin uninstall aman-claude-code@aman                             # removes the plugin
-claude plugin marketplace remove aman                                # removes the marketplace entry
-# (optional) remove ecosystem data:
-rm -rf ~/.acore ~/.arules ~/.amem ~/.aeval ~/.akit ~/.aflow ~/.askill
-```
+The observer is opt-in: it only runs when `AMAN_OBSERVER_ENABLED=1` is set in your shell. Remove or unset that variable to disable it. The tally file at `~/.arules/dev/plugin/.tally.tsv` can be deleted safely — it will be recreated empty.
 
 </details>
 
 ---
 
-## The Ecosystem
+## The ecosystem
 
-```
-aman
-├── acore        → identity    → who your AI IS
-├── amem         → memory      → what your AI KNOWS
-├── akit         → tools       → what your AI CAN DO
-├── aflow        → workflows   → HOW your AI works
-├── arules       → guardrails  → what your AI WON'T do
-├── askill       → skills      → what your AI MASTERS
-├── aeval        → evaluation  → how GOOD your AI is
-├── achannel     → channels    → WHERE your AI lives
-├── aman-mcp     → MCP server  → the bridge (31 tools)
-├── aman-agent   → agent UI    → chat frontend w/ memory
-├── aman-claude-code  → plugin      → Claude Code glue  ← YOU ARE HERE
-└── aman-copilot → plugin      → VS Code + GitHub Copilot Chat glue
-```
-
-| Layer | Package | What it does |
-|:------|:--------|:-------------|
+| Layer | Package | Purpose |
+|:------|:--------|:--------|
 | Identity | [acore](https://github.com/amanasmuei/acore) | Personality, values, relationship memory |
 | Memory | [amem](https://github.com/amanasmuei/amem) | Persistent knowledge storage (MCP) |
-| Tools | [akit](https://github.com/amanasmuei/akit) | 15 portable AI tools (MCP + manual fallback) |
+| Tools | [akit](https://github.com/amanasmuei/akit) | 15 portable AI tools |
 | Workflows | [aflow](https://github.com/amanasmuei/aflow) | Reusable AI workflows |
 | Guardrails | [arules](https://github.com/amanasmuei/arules) | Safety boundaries and permissions |
 | Skills | [askill](https://github.com/amanasmuei/askill) | Domain expertise |
 | Evaluation | [aeval](https://github.com/amanasmuei/aeval) | Relationship tracking |
-| Channels | [achannel](https://github.com/amanasmuei/achannel) | Telegram, Discord, webhooks |
 | MCP Server | [aman-mcp](https://github.com/amanasmuei/aman-mcp) | 31 MCP tools across all layers |
-| Agent UI | [aman-agent](https://github.com/amanasmuei/aman-agent) | Chat frontend with memory |
-| **Claude Code** | **aman-claude-code** | **Claude Code integration** |
-| VS Code | [aman-copilot](https://github.com/amanasmuei/aman-copilot) | GitHub Copilot Chat integration |
+| VS Code | [aman-copilot](https://github.com/amanasmuei/aman-copilot) | GitHub Copilot Chat integration — same identity, same memory |
 
 ---
 
-## Contributing
+## Updating
 
-Contributions welcome! Please:
+```bash
+claude plugin update aman-claude-code@aman
+npx @aman_asmuei/aman@latest
+```
 
-1. Open an issue describing the change before sending a PR for anything non-trivial.
-2. Run `bash test/test-hook.sh` before submitting — **all 20 tests must pass.**
-3. Update [`CHANGELOG.md`](CHANGELOG.md) under the next unreleased version.
+Always use the fully-qualified `aman-claude-code@aman` form — the bare name fails with "Plugin not found". See [CHANGELOG.md](CHANGELOG.md) for what changed.
+
+---
 
 ## License
 
 [MIT](LICENSE)
-
----
-
-<div align="center">
-
-**Install once. Load always. Claude Code + aman.**
-
-<sub>Built with care as part of the <a href="https://github.com/amanasmuei/aman">aman ecosystem</a>.</sub>
-
-</div>
