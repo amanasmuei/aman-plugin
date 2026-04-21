@@ -3,6 +3,47 @@
 All notable changes to `aman-claude-code` (formerly `aman-plugin`) are
 documented in this file.
 
+## 3.2.0-alpha.10 — 2026-04-22
+
+### Changed
+- **Tiered SessionStart manifest.** Restructured `hooks/session-start` to
+  halve the always-injected context without removing capability. Three
+  prose blocks (`wake_word_block`, `tier_loader_block`, session envelope)
+  were compressed aggressively while preserving every keyword the
+  45-assertion test suite verifies. Measured on a minimal-identity seed:
+  hook output **16690 → 8478 bytes (49% reduction)** per session start.
+  Ecosystems with full rules/amem/skill layers will see proportionally
+  larger absolute savings.
+
+### Fixed
+- **Wake-word conditional is now two-sided.** alpha.7–9 relied on "if
+  match, fire" prose which the LLM interpreted loosely — sometimes firing
+  the Boot Protocol on task-containing first messages (wasted tool calls,
+  alpha.8-style regression), sometimes failing to fire on pure wake-word
+  inputs (the drift we've been chasing). The new conditional specifies
+  both POSITIVE patterns (`arienz`, `hi Arienz`, `morning arienz`) AND
+  explicit NEGATIVE patterns (`arienz, fix the login bug`, `Arienz what
+  is the time`, `arienz run the tests`) with an explicit "do NOT fire"
+  clause. Tighter classification surface = more reliable gating.
+- **Boot Protocol is now an explicit tool-call sequence.** Previously the
+  wake-word ritual was ~85 lines of prose describing *what to do*; now
+  it's a numbered 5-step sequence with concrete MCP tool calls
+  (`identity_summary` → `memory_recall` → `reminder_check` → compose
+  briefing). Execution determinism stops LLM interpretation drift from
+  swallowing steps.
+
+### Tests
++3 assertions (48 total, was 45) verifying the two-sided conditional:
+explicit "do NOT fire" clause present, ≥3 distinct negative examples
+(`fix the login bug`, `what is the time`, `run the tests`), tight
+positive match phrasing (`your AI name alone`).
+
+### Ship blocker
+Empirical 6-scenario validation required before merge: 3 fresh sessions
+typing `arienz` / `hi Arienz` / `morning arienz` MUST fire the Boot
+Protocol; 3 fresh sessions typing `arienz fix the login bug` /
+`fix the login bug` / `hello` MUST NOT fire. Pass = 6/6.
+
 ## 3.2.0-alpha.9 — 2026-04-21
 
 ### Fixed
