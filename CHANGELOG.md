@@ -3,6 +3,35 @@
 All notable changes to `aman-claude-code` (formerly `aman-plugin`) are
 documented in this file.
 
+## 3.2.0-alpha.2 — 2026-04-21
+
+### Added
+- **Wake-word briefing** (Block A): when the user's first message in a session
+  is just the AI's identity name (e.g., "Sarah", "hi Sarah"), Claude responds
+  with a session briefing — last `memory_recall` narrative, `reminder_check`
+  due items, pending passive-observer suggestions, then "what's next?" — instead
+  of silent auto-load. Gated on `name != "Companion"` and ecosystem present.
+  Injected as an instruction block in `hooks/session-start`; no new skills or
+  MCP tools required.
+- **Tier-loader phrase catalog** (Block B): natural-language phrases like
+  `load rules`, `load workflows`, `load memory`, `load archetype`, `load tools`,
+  `load skills`, `load eval`, `load identity` map to the corresponding
+  `npx @aman_asmuei/*` installer. Claude runs them via Bash when the user says
+  the phrase. Respects already-installed layers by asking before re-running.
+
+Both are additive instructions injected into the existing session-start context;
+users who never trigger them see identical behavior to 3.2.0-alpha.1.
+
+Inspired by the wake-word + tiered-discovery pattern in
+[Kiyoraka/Project-AI-MemoryCore](https://github.com/Kiyoraka/Project-AI-MemoryCore).
+See `docs/superpowers/specs/2026-04-21-wake-word-and-tier-loaders-design.md`.
+
+### Fixed
+- Hardened `test/test-hook.sh` cleanup (`rm -rf ... 2>/dev/null || true`) to
+  prevent `set -euo pipefail` abort caused by the background `amem-cli sync`
+  writing into temp HOME dirs — a pre-existing race on machines with
+  `amem-cli` installed.
+
 ## 3.2.0-alpha.1 — 2026-04-20
 
 ### Added

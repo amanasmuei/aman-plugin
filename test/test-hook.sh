@@ -66,7 +66,7 @@ else
   fail "Missing 'No aman ecosystem configured' message"
 fi
 
-rm -rf "$TMPDIR1"
+rm -rf "$TMPDIR1" 2>/dev/null || true
 
 # ---------- Test 2: Only core.md present ----------
 echo ""
@@ -90,7 +90,7 @@ else
   fail "Missing core.md content"
 fi
 
-rm -rf "$TMPDIR2"
+rm -rf "$TMPDIR2" 2>/dev/null || true
 
 # ---------- Test 3: Only kit.md present ----------
 echo ""
@@ -108,7 +108,7 @@ else
   fail "Missing kit.md content"
 fi
 
-rm -rf "$TMPDIR3"
+rm -rf "$TMPDIR3" 2>/dev/null || true
 
 # ---------- Test 4: Only flow.md present ----------
 echo ""
@@ -126,7 +126,7 @@ else
   fail "Missing flow.md content"
 fi
 
-rm -rf "$TMPDIR4"
+rm -rf "$TMPDIR4" 2>/dev/null || true
 
 # ---------- Test 5: Only rules.md present ----------
 echo ""
@@ -144,7 +144,7 @@ else
   fail "Missing rules.md content"
 fi
 
-rm -rf "$TMPDIR5"
+rm -rf "$TMPDIR5" 2>/dev/null || true
 
 # ---------- Test 6: Only skills.md present ----------
 echo ""
@@ -162,7 +162,7 @@ else
   fail "Missing skills.md content"
 fi
 
-rm -rf "$TMPDIR6"
+rm -rf "$TMPDIR6" 2>/dev/null || true
 
 # ---------- Test 7: All files present ----------
 echo ""
@@ -202,7 +202,7 @@ else
   pass "Correctly omits 'No aman ecosystem configured' when files exist"
 fi
 
-rm -rf "$TMPDIR7"
+rm -rf "$TMPDIR7" 2>/dev/null || true
 
 # ---------- Test 8: hookSpecificOutput structure ----------
 echo ""
@@ -226,7 +226,7 @@ else
   fail "hookSpecificOutput missing additionalContext"
 fi
 
-rm -rf "$TMPDIR8"
+rm -rf "$TMPDIR8" 2>/dev/null || true
 
 # ---------- Test 9: amem guidance injected when ~/.amem exists ----------
 echo ""
@@ -248,7 +248,7 @@ else
   fail "amem guidance missing memory_inject reference"
 fi
 
-rm -rf "$TMPDIR9"
+rm -rf "$TMPDIR9" 2>/dev/null || true
 
 # ---------- Test 10: amem guidance absent when ~/.amem missing ----------
 echo ""
@@ -266,7 +266,7 @@ else
   pass "amem guidance correctly omitted when ~/.amem missing"
 fi
 
-rm -rf "$TMPDIR10"
+rm -rf "$TMPDIR10" 2>/dev/null || true
 
 # ---------- Test 11: install-mcp.mjs syntax is valid ----------
 echo ""
@@ -281,6 +281,97 @@ if grep -q 'aman-mcp@\^' "$SCRIPT_DIR/../bin/install-mcp.mjs"; then
 else
   fail "install-mcp.mjs does not pin aman-mcp version"
 fi
+
+# ---------- Test 12: Block A (wake-word briefing) injected when ecosystem exists ----------
+echo ""
+echo "Test 12: Wake-word briefing block present when ecosystem exists"
+TMPDIR_A=$(mktemp -d)
+mkdir -p "$TMPDIR_A/.acore/dev/plugin"
+echo "# Identity
+name: Sarah" > "$TMPDIR_A/.acore/dev/plugin/core.md"
+
+OUTPUT=$(HOME="$TMPDIR_A" bash "$HOOK_PATH" 2>&1)
+CONTEXT=$(echo "$OUTPUT" | jq -r '.additional_context')
+
+if echo "$CONTEXT" | grep -q "Wake-word briefing"; then
+  pass "Contains 'Wake-word briefing' heading when ecosystem exists"
+else
+  fail "Missing 'Wake-word briefing' heading"
+fi
+
+if echo "$CONTEXT" | grep -q "EXPLICIT briefing request"; then
+  pass "Contains Block A body signature"
+else
+  fail "Missing Block A body signature"
+fi
+
+rm -rf "$TMPDIR_A" 2>/dev/null || true
+
+# ---------- Test 13: Block B (tier loaders) injected when ecosystem exists ----------
+echo ""
+echo "Test 13: Tier-loader block present when ecosystem exists"
+TMPDIR_B=$(mktemp -d)
+mkdir -p "$TMPDIR_B/.acore/dev/plugin"
+echo "# Identity
+name: Sarah" > "$TMPDIR_B/.acore/dev/plugin/core.md"
+
+OUTPUT=$(HOME="$TMPDIR_B" bash "$HOOK_PATH" 2>&1)
+CONTEXT=$(echo "$OUTPUT" | jq -r '.additional_context')
+
+if echo "$CONTEXT" | grep -q "Tier upgrades — natural-language loaders"; then
+  pass "Contains 'Tier upgrades' heading"
+else
+  fail "Missing 'Tier upgrades' heading"
+fi
+
+if echo "$CONTEXT" | grep -q "load rules"; then
+  pass "Contains 'load rules' phrase in catalog"
+else
+  fail "Missing 'load rules' phrase"
+fi
+
+if echo "$CONTEXT" | grep -q "npx @aman_asmuei/arules init"; then
+  pass "Contains arules npx command in catalog"
+else
+  fail "Missing arules npx command"
+fi
+
+if echo "$CONTEXT" | grep -q "load archetype"; then
+  pass "Contains 'load archetype' phrase"
+else
+  fail "Missing 'load archetype' phrase"
+fi
+
+rm -rf "$TMPDIR_B" 2>/dev/null || true
+
+# ---------- Test 14: Blocks NOT injected when ecosystem is empty ----------
+echo ""
+echo "Test 14: Blocks absent when no ecosystem configured"
+TMPDIR_C=$(mktemp -d)
+# Empty HOME — no .acore, no .arules, no .aflow, nothing.
+
+OUTPUT=$(HOME="$TMPDIR_C" bash "$HOOK_PATH" 2>&1)
+CONTEXT=$(echo "$OUTPUT" | jq -r '.additional_context')
+
+if echo "$CONTEXT" | grep -q "Wake-word briefing"; then
+  fail "Block A leaked into no-ecosystem fallback"
+else
+  pass "Block A correctly absent when no ecosystem exists"
+fi
+
+if echo "$CONTEXT" | grep -q "Tier upgrades"; then
+  fail "Block B leaked into no-ecosystem fallback"
+else
+  pass "Block B correctly absent when no ecosystem exists"
+fi
+
+if echo "$CONTEXT" | grep -q "No aman ecosystem configured"; then
+  pass "Fallback message still present when no ecosystem"
+else
+  fail "Fallback message missing — regression"
+fi
+
+rm -rf "$TMPDIR_C" 2>/dev/null || true
 
 # ---------- Summary ----------
 echo ""
