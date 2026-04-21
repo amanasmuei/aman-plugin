@@ -70,7 +70,7 @@ claude plugin install aman-claude-code@aman
 
 ## What's new in v3.2.0-alpha.2 — wake-word ritual + tier loaders
 
-Two session-time UX moments inspired by [Kiyoraka/Project-AI-MemoryCore](https://github.com/Kiyoraka/Project-AI-MemoryCore).
+Two new session-time UX moments land in this release.
 
 **Wake-word briefing.** Type your AI's name as the first message of a session and you get a real briefing — last session narrative, today's reminders, pending rule suggestions — instead of silent auto-load. It's a natural way to open a session without having to ask "what did we work on last time?"
 
@@ -131,7 +131,7 @@ npx @aman_asmuei/aman@latest
 
 This walks you through setting up `acore` (identity), `arules` (guardrails), and `aeval` (relationship tracking).
 
-> **New in acore 0.7.0:** developer archetypes now ship with **Fundamental Truths** — short self-anchoring assertions the AI re-reads each session so it stays in character across long conversations (e.g. The Mentor stays patient; The Pragmatist keeps leading with the answer). Non-breaking, additive. See [acore#1](https://github.com/amanasmuei/acore/issues/1) for the design story. Concept credit: [Kiyoraka/Project-AI-MemoryCore](https://github.com/Kiyoraka/Project-AI-MemoryCore).
+> **New in acore 0.7.0:** developer archetypes now ship with **Fundamental Truths** — short self-anchoring assertions the AI re-reads each session so it stays in character across long conversations (e.g. The Mentor stays patient; The Pragmatist keeps leading with the answer). Non-breaking, additive. See [acore#1](https://github.com/amanasmuei/acore/issues/1) for the design story.
 
 > **Why `npx @latest` and not `npm install -g`?**
 > These are one-shot setup commands — run once, done. `npx` keeps your global `node_modules` clean and avoids `sudo` / permission issues on macOS and Linux. The explicit `@latest` tag matters: **npx caches binaries**, so if you (or your friend) ran a package yesterday you may get the cached older version on the next run. `@latest` forces a fresh resolve against the npm registry. If you *really* want a global install, `npm install -g @aman_asmuei/aman` works too — but it's not recommended for most users.
