@@ -3,6 +3,30 @@
 All notable changes to `aman-claude-code` (formerly `aman-plugin`) are
 documented in this file.
 
+## 3.2.0-alpha.11 — 2026-04-22
+
+### Fixed
+- **Dropped undocumented top-level `additional_context` field from hook
+  JSON emit.** Claude Code's SessionStart hook schema documents only
+  `hookSpecificOutput.additionalContext` as the field injected into
+  conversation context; the top-level sibling was a duplicate carrying
+  the same escaped payload that Claude never read. Empirically verified
+  against live sessions (injected `<aman-ecosystem>` block appears once,
+  not twice). Hook JSON output: **19549 → 8704 bytes (55% I/O cut).**
+  **Claude-facing context: unchanged** — the canonical field's content
+  is identical to alpha.10.
+
+### Tests
+No assertion count change. Migrated all `.additional_context` reads in
+`test/test-hook.sh` to `.hookSpecificOutput.additionalContext`. Added
+a regression assertion guarding against the legacy field reappearing.
+
+### Note
+This is a structural cleanup aligning with Claude Code's documented
+schema. No user-visible behavior change. If a downstream tool was
+reading the undocumented top-level field, it must switch to the
+canonical path.
+
 ## 3.2.0-alpha.10 — 2026-04-22
 
 ### Changed
