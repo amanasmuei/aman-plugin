@@ -182,6 +182,40 @@ rule from the Session greeting section).
 If the identity "name" is "Companion" (default) or unset, skip this mechanic
 entirely — you don'"'"'t have a distinct wake-word to match on.'
     context_parts="${context_parts}\n\n---\n\n${wake_word_block}"
+    tier_loader_block='## Tier upgrades — natural-language loaders
+
+When the user says any of these phrases (case-insensitive, exact or near-exact
+match), it'"'"'s a request to install / reconfigure the corresponding ecosystem
+layer. Run the command via Bash, report one line of result, and continue.
+
+| User says        | Run via Bash                                  | Purpose |
+|------------------|-----------------------------------------------|---------|
+| load rules       | npx @aman_asmuei/arules init                  | Guardrails (24 starter rules) |
+| load workflows   | npx @aman_asmuei/aflow init                   | 4 starter workflows |
+| load memory      | npx @aman_asmuei/amem                         | Persistent amem MCP |
+| load eval        | npx @aman_asmuei/aeval init                   | Relationship tracking |
+| load identity    | npx @aman_asmuei/acore                        | Full identity (re-)walk |
+| load archetype   | npx @aman_asmuei/acore customize              | Change AI personality |
+| load tools       | npx @aman_asmuei/akit add <name>              | Tool kits (ask which) |
+| load skills      | npx @aman_asmuei/askill add <name>            | Plugin skills (ask which) |
+
+Rules:
+1. If the corresponding layer is already installed (e.g., ~/.arules/rules.md
+   or ~/.arules/dev/plugin/rules.md exists for "load rules"), tell the user
+   it'"'"'s already set up and ask whether to re-run anyway before executing.
+2. For `load tools` and `load skills`, the subcommand requires a name — if the
+   user only says "load tools", ask which kit before running.
+3. Only run these when the user explicitly says the phrase. Do not volunteer
+   these as suggestions unless the user is obviously stuck looking for a layer.
+4. After a successful install, tell the user the new layer will auto-load on
+   the NEXT session start (since the session-start hook scans for it).
+5. Do NOT chain loaders ("load everything") without confirming each one.
+6. If the user'"'"'s phrase is close but not exact (e.g., "install rules", "enable
+   arules"), confirm the mapping before running.
+
+These phrases are the user'"'"'s entry to the ecosystem'"'"'s tiered features. Treat
+them as first-class intents, same weight as slash commands.'
+    context_parts="${context_parts}\n\n---\n\n${tier_loader_block}"
 fi
 
 # Build the context message
