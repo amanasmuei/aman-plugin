@@ -68,6 +68,18 @@ claude plugin install aman-claude-code@aman
 
 ---
 
+## What's new in v3.2.0-alpha.2 — wake-word ritual + tier loaders
+
+Two session-time UX moments inspired by [Kiyoraka/Project-AI-MemoryCore](https://github.com/Kiyoraka/Project-AI-MemoryCore).
+
+**Wake-word briefing.** Type your AI's name as the first message of a session and you get a real briefing — last session narrative, today's reminders, pending rule suggestions — instead of silent auto-load. It's a natural way to open a session without having to ask "what did we work on last time?"
+
+**Tier-loader phrases.** Say `load memory`, `load rules`, `load workflows`, or any of the catalog phrases listed below, and the plugin runs the appropriate `npx` command for you — no need to remember package names or flags. Useful when you're mid-conversation and realize a layer is missing.
+
+See [Wake-word briefing](#wake-word-briefing) and [Tier upgrades by phrase](#tier-upgrades-by-phrase) below.
+
+---
+
 ## Passive rule observer (opt-in, v3.2.0-alpha.1+)
 
 Set `AMAN_OBSERVER_ENABLED=1` in your shell to enable the passive observer. It watches your Claude Code conversations for repeated corrections (e.g., "don't commit without tests" said 3 times across sessions) and queues them as rule suggestions.
@@ -330,6 +342,48 @@ The hook also exports `AMAN_MCP_SCOPE=dev:plugin` so any MCP tool spawned during
 | **Before risky actions** | Checks against your guardrails |
 | **During tasks** | Follows matching workflows automatically |
 | **Session end** | Offers to save what the AI learned; offers `/session-narrative` for substantial sessions where the reasoning path matters |
+
+### Wake-word briefing
+
+Type your AI's name as the first message of a session and you get a real briefing instead of a silent "hello":
+
+```text
+You: Sarah
+
+Sarah: Morning, Aman — today's the 21st. Last session we wired up
+       scope inheritance across the acore ecosystem (v0.3.0 now live).
+       2 reminders due: the passive-observer alpha follow-up, and the
+       amem RFC thread. 3 rule suggestions pending — run /rules review
+       when you're ready. What's next?
+```
+
+Triggered only when your first message is just the AI's name (or a greeting with the name, like `hi Sarah`). If the first message is already a task (`Sarah, fix the login bug`), the plugin folds the greeting into the task opener as before — no noise added. Skipped automatically if you haven't personalized the name (still set to `Companion`).
+
+### Tier upgrades by phrase
+
+Don't remember which `npx` command adds which layer? Just ask in plain language:
+
+```text
+You: load memory
+
+Claude: Installing @aman_asmuei/amem (persistent memory MCP)…
+        ✓ Installed. amem will auto-load on your next session.
+```
+
+Full catalog:
+
+| You say           | Runs                                      | What it adds |
+|:------------------|:------------------------------------------|:-------------|
+| `load rules`      | `npx @aman_asmuei/arules init`            | Guardrails (24 starter rules) |
+| `load workflows`  | `npx @aman_asmuei/aflow init`             | 4 starter workflows |
+| `load memory`     | `npx @aman_asmuei/amem`                   | Persistent amem MCP |
+| `load eval`       | `npx @aman_asmuei/aeval init`             | Relationship tracking |
+| `load identity`   | `npx @aman_asmuei/acore`                  | Full identity (re-)walk |
+| `load archetype`  | `npx @aman_asmuei/acore customize`        | Change AI personality |
+| `load tools`      | `npx @aman_asmuei/akit add <name>`        | Tool kits (Claude asks which) |
+| `load skills`     | `npx @aman_asmuei/askill add <name>`      | Plugin skills (Claude asks which) |
+
+If a layer is already installed, Claude asks before re-running. Subcommands that need an argument (tools, skills) get an interactive "which one?" prompt before executing.
 
 ---
 
