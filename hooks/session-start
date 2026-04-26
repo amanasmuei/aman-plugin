@@ -236,6 +236,74 @@ PCEND
     context_parts="${context_parts}\n\n---\n\n${project_context_block}"
 fi
 
+# Projects (aprojects) — active thread surfacing
+projects_path=$(resolve_layer_file ".aprojects" "projects.md")
+if [ -n "${projects_path:-}" ] && [ -f "$projects_path" ]; then
+    # Extract Active List section and the position-1 project for the greeting.
+    # POSIX-portable awk (works on BSD awk on macOS — does NOT use gawk's 3-arg match).
+    # Falls back gracefully on parse failure.
+    projects_block=$(awk '
+      /^## Active List/{in_active=1; next}
+      /^## /{in_active=0}
+      in_active && /^### / {
+        line = $0
+        if (match(line, /\[project:[0-9A-HJKMNP-TV-Z]+\]$/)) {
+          id_token = substr(line, RSTART, RLENGTH)
+          # strip "[project:" prefix (9 chars) and "]" suffix (1 char) → 26-char ULID
+          id = substr(id_token, 10, RLENGTH - 10)
+          # name = text between "### " (4 chars) and " [project:..."
+          name = substr(line, 5, RSTART - 6)
+          if (first_name == "") { first_name = name; first_id = id }
+          all_names[++cnt] = name
+        }
+      }
+      in_active && /^- Last touched:/{
+        if (first_touched == "") {
+          sub(/^- Last touched: /, "")
+          first_touched = $0
+        }
+      }
+      in_active && /^- Linked intention:/{
+        if (first_intent == "") {
+          sub(/^- Linked intention: /, "")
+          first_intent = $0
+        }
+      }
+      in_active && /^- Workspaces:/{
+        if (first_ws == "") {
+          sub(/^- Workspaces: /, "")
+          first_ws = $0
+        }
+      }
+      END {
+        if (cnt == 0) {
+          print "No active projects yet — say '\''i got a new project'\'' or '\''register my existing projects'\'' to start."
+          exit
+        }
+        printf "### Active project\n"
+        printf "- **%s** [project:%s]\n", first_name, first_id
+        if (first_touched != "") printf "- Last touched: %s\n", first_touched
+        if (first_intent != "") printf "- Linked intention: %s\n", first_intent
+        if (first_ws != "") printf "- Workspaces: %s\n", first_ws
+        printf "\n### All active threads (%d/10)\n", cnt
+        for (i=1; i<=cnt; i++) printf "- #%d %s\n", i, all_names[i]
+        printf "\nBehavioral instruction: when the user starts working on a project, call mcp__aman__project_touch. When logging session work, call mcp__aman__project_save. When the user creates / switches / closes projects in natural language, follow the conversational triggers in the projects skill.\n"
+      }
+    ' "$projects_path" 2>/dev/null || echo "")
+
+    if [ -n "$projects_block" ]; then
+        context_parts="${context_parts}
+
+<arienz-projects-continuity>
+${projects_block}
+
+### Cwd context
+- Current working dir: ${PWD}
+- (Skill should match against the workspaces field above and surface inline if matched.)
+</arienz-projects-continuity>"
+    fi
+fi
+
 # Build the context message
 if [ -z "$context_parts" ]; then
     session_context="<aman-ecosystem>\nNo aman ecosystem configured. Run: npx @aman_asmuei/aman\n</aman-ecosystem>"
