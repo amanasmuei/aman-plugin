@@ -3,6 +3,35 @@
 All notable changes to `aman-claude-code` (formerly `aman-plugin`) are
 documented in this file.
 
+## 3.2.0-alpha.12 — 2026-04-26
+
+### Added — Projects skill + SessionStart hook integration
+
+Plugin-side companion to [aman-mcp 0.8.0](https://www.npmjs.com/package/@aman_asmuei/aman-mcp)
+which shipped the LRU project layer.
+
+- **New skill** `skills/projects/SKILL.md` — conversational triggers map
+  natural language ("what's the active project", "i got a new project",
+  "save this session", "load X", "close X") to the new `mcp__aman__project_*`
+  tools. Includes workspace-guard on save, ambiguity-surfacing rules, and
+  the bootstrap flow for migrating existing work from intentions/eval
+  substrate.
+- **SessionStart hook extension** — reads `~/.aprojects/dev/plugin/projects.md`
+  and injects an `<arienz-projects-continuity>` block with the position-1
+  active project, niyyah, workspaces, and total active-thread count. Active
+  project surfaces unconditionally in the greeting (per spec).
+
+### Compatibility
+The hook's awk parser is **POSIX-portable** (substr/RSTART/RLENGTH form),
+verified against BSD awk on macOS Darwin. Does not require gawk.
+
+### Migration
+- Requires `@aman_asmuei/aman-mcp@^0.8.0`. Older versions don't expose the
+  `project_*` tools the skill calls.
+- First fresh session after install with no `~/.aprojects/` yet: hook injects
+  an empty-state line ("No active projects yet — say 'i got a new project'…")
+  rather than a populated block. No crash, no error.
+
 ## 3.2.0-alpha.11 — 2026-04-22
 
 ### Fixed
